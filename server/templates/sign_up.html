@@ -1,0 +1,17 @@
+{% extends 'layout.html' %}
+
+{% block title %}Регистрация{% endblock %}
+
+{% block sign %}
+	<div class="container">
+		<h2>Регистрация</h2>
+		<form action="/login" method="post">
+			<input type="text" name="first_name" placeholder="Имя" required>
+			<input type="text" name="second_name" placeholder="Фамилия" required>
+			<input type="text" name="email" placeholder="Электорнная почта" required>
+			<input type="password" name="password" placeholder="Пароль" required>
+            <input type="password" name="comfirm_password" placeholder="Подтвердите пароль" required>
+			<input type="submit" value="Зарегистрироваться">
+		</form>
+	</div>
+{% endblock %}
