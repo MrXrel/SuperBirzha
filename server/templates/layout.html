@@ -15,17 +15,13 @@
         <h2 href="#">МАИ Инвестиции</h2>
         <ul class="nav justify-content-end">
             <li class="nav-item">
-            <a class="nav-link" href="#">О нас</a>
+            <a class="nav-link" href="{{ url_for('get_about_us') }}">О нас</a>
             </li>
             <li class="nav-item">
             <a class="nav-link" href="#">Валюта</a>
             </li>
             <li class="nav-item">
-                {% if user.is_authorized %}
-                    <a class="nav-link" href="{{ url_for('get_private_office') }}">Личный кабинет</a>
-                {% else %}
-                    <a class="nav-link" href="{{ url_for('get_user_authorization') }}">Личный кабинет</a>
-                {% endif %}
+                <a class="nav-link" href="{{ url_for('get_private_office') }}">Личный кабинет</a>
             </li>
         </ul>
     </header>
