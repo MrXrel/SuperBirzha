@@ -5,13 +5,14 @@
 {% block sign %}
 	<div class="container">
 		<h2>Регистрация</h2>
-		<form action="/login" method="post">
-			<input type="text" name="first_name" placeholder="Имя" required>
-			<input type="text" name="second_name" placeholder="Фамилия" required>
-			<input type="text" name="email" placeholder="Электорнная почта" required>
-			<input type="password" name="password" placeholder="Пароль" required>
-            <input type="password" name="comfirm_password" placeholder="Подтвердите пароль" required>
-			<input type="submit" value="Зарегистрироваться">
+		<form method="Post" action="">
+			{{ form.hidden_tag() }}
+			<p> {{ form.name() }}
+			<p> {{ form.second_name() }}
+			<p> {{ form.email() }}
+			<p> {{ form.password() }}
+			<p> {{ form.password_confirm() }}
+			<p> {{ form.submit() }}
 		</form>
 	</div>
 {% endblock %}
