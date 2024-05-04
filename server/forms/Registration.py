@@ -24,7 +24,7 @@ class RegistrationForm(FlaskForm):
         validators=[
             DataRequired(),
             Length(min=3, max=20),
-            EqualTo("passwords", message="Пароли не совпадают"),
+            EqualTo("password", message="Пароли не совпадают"),
         ],
         render_kw={"placeholder": "Подтвердите пароль"},
     )
