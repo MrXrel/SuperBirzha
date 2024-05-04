@@ -26,6 +26,7 @@ class Database:
                                 Column('type_of_operation', String(10), nullable=False),
                                 Column('time', DateTime(), default=datetime.now())
                                 )
+        self.operations_keys = ('ID', 'user_ID', 'currency_ID', 'price', 'quantity', 'type_of_operation', 'time')
         self.currency = Table('Currency', self.metadata,
                               Column('ID', Integer(), primary_key=True),
                               Column('currency_name', String(200), nullable=False, unique=True),
@@ -128,3 +129,16 @@ class Database:
             ).values(
                 price=price
             ))
+
+    def get_history_by_id(self, user_id: int, number_of_rows: int = -1) -> list:
+        r = self.conn.execute(select(self.operations).where(
+            self.operations.c.user_ID == user_id
+        ).order_by(desc(self.operations.c.ID)))
+        history = []
+        if number_of_rows == -1:
+            rows = r.fetchall()
+        else:
+            rows = r.fetchmany(number_of_rows)
+        for row in rows:
+            history.append({key: value for key, value in zip(self.operations_keys, row)})
+        return history
