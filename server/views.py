@@ -13,14 +13,13 @@ def load_user(user_id):
         return models.UserLogin().fromDB(user_id)
 
 
-@app.route("/test")
-def test():
-    return render_template("pettern_currencies.html")
+@app.get("/currencies")
+def get_currencies():
+    return render_template("currencies.html")
 
 
 # Начальная страница
 @app.get("/")
-@login_required
 def get_about_us():
     return render_template("About_us.html")
 
@@ -50,18 +49,19 @@ def user_registration():
     return render_template("sign_up.html", form=form)
 
 
+# Get запрос на авторизацию
 @app.get("/authorization")
 def get_user_authorization():
     form = LoginForm()
     return render_template("sign_in.html", form=form)
 
 
+# Post запрос на авторизацию
 @app.post("/authorization")
 def post_user_authorization():
     email = request.form["email"]
     psw = request.form["password"]
     for i in USERS:
-        print(i.email, i._password)
         if i.email == email and check_password_hash(i._password, psw):
             user = i
             userlogin = models.UserLogin().create(user)

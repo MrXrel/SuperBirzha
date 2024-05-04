@@ -5,7 +5,7 @@
 {% block sign %}
     <center>
         <div id="persacc">
-            <div><h4>Счёт в Рублях:</h4><span>10 000</span> ₽</div>
+            <div><h4>Счёт в Рублях:</h4><span>{{ user.get_balance() }}</span> ₽</div>
             <div id="account"><p>{{ user.get_name() }}  {{user.get_surname()}}</p></div>
         </div>
         <div id="currectangle">

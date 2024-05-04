@@ -3,7 +3,7 @@ from server import USERS
 
 
 class User:
-    def __init__(self, user_id, email, password, surname, name, balance=10000):
+    def __init__(self, user_id, email, password, surname, name, balance=5000):
         self.user_iid = user_id
         self.email = email
         self._password = password
@@ -29,3 +29,6 @@ class UserLogin(UserMixin):
 
     def get_surname(self):
         return self.__user.surname
+
+    def get_balance(self):
+        return self.__user._balance

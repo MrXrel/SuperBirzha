@@ -6,6 +6,7 @@
     <div class="container">
         <h2>Вход</h2>
         <form action="" method="post">
+            {{ form.hidden_tag() }}
             <p>{{ form.email() }}
             <p>{{ form.password() }}
             <p>{{ form.submit() }}
