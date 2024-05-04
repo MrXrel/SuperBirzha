@@ -9,14 +9,14 @@ class Database:
         self.metadata = MetaData()
         self.users = Table('Users', self.metadata,
                            Column('ID', Integer(), primary_key=True),
-                           Column('login', String(200), nullable=False, unique=True),
+                           Column('email', String(200), nullable=False, unique=True),
                            Column('password', String(200), nullable=False),
                            Column('surname', String(200), nullable=False),
                            Column('name', String(200), nullable=False),
-                           Column('authorized', Boolean(), default=False),
                            Column('balance', Float(), nullable=False, default=10000),
                            Column('time_to_note', Time(), default=time(hour=10, minute=0))
                            )
+        self.user_keys = ('ID', 'email', 'password', 'surname', 'name', 'balance', 'time_to_note')
         self.operations = Table('Operations', self.metadata,
                                 Column('ID', Integer(), primary_key=True),
                                 Column('user_ID', ForeignKey('Users.ID')),
@@ -31,9 +31,9 @@ class Database:
                               )
         self.metadata.create_all(self.engine)
 
-    def create_user(self, login: str, password: str, surname: str, name: str) -> int:
+    def create_user(self, email: str, password: str, surname: str, name: str) -> int:
         ins = insert(self.users).values(
-            login=login,
+            email=email,
             password=password,
             surname=surname,
             name=name
@@ -64,3 +64,19 @@ class Database:
         r = self.conn.execute(s)
         p = r.fetchall()[0]
         return {'surname': p[3], 'name': p[4]}
+
+    def get_data_by_id(self, user_id: int) -> dict:
+        s = select(self.users).where(
+            self.users.c.ID == user_id
+        )
+        r = self.conn.execute(s)
+        p = r.fetchall()[0]
+        return {key: value for key, value in zip(self.user_keys, p)}
+
+    def get_data_by_email(self, email: str) -> dict:
+        s = select(self.users).where(
+            self.users.c.email == email
+        )
+        r = self.conn.execute(s)
+        p = r.fetchall()[0]
+        return {key: value for key, value in zip(self.user_keys, p)}
