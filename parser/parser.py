@@ -1,4 +1,10 @@
-from tinkoff.invest import InstrumentIdType, InstrumentStatus, CandleInterval, Client, HistoricCandle
+from tinkoff.invest import (
+    InstrumentIdType,
+    InstrumentStatus,
+    CandleInterval,
+    Client,
+    HistoricCandle,
+)
 from pandas import DataFrame
 from config import token
 
@@ -13,7 +19,8 @@ def get_all_shares():
     with Client(token) as client:
         try:
             all_shares = client.instruments.shares(
-                instrument_status=InstrumentStatus.INSTRUMENT_STATUS_BASE).instruments
+                instrument_status=InstrumentStatus.INSTRUMENT_STATUS_BASE
+            ).instruments
             return all_shares
         except Exception as e:
             return f"In function get_all_shares \n {e}"
@@ -26,7 +33,8 @@ def get_all_currencies():
     with Client(token) as client:
         try:
             all_currencies = client.instruments.currencies(
-                instrument_status=InstrumentStatus.INSTRUMENT_STATUS_ALL).instruments
+                instrument_status=InstrumentStatus.INSTRUMENT_STATUS_ALL
+            ).instruments
             return all_currencies
         except Exception as e:
             return f"In function get_all_currencies \n {e}"
@@ -34,7 +42,7 @@ def get_all_currencies():
 
 def create_data_frame(instrument):
     # return very beautiful data_frame for convenience
-    data_frame = DataFrame(instrument, columns=['ticker', 'figi', 'name'])
+    data_frame = DataFrame(instrument, columns=["ticker", "figi", "name"])
     return data_frame
 
 
@@ -42,18 +50,18 @@ def get_figi_by_ticker(ticker, type_):
     # type_ - currency of share
     with Client(token) as client:
         try:
-            if type_ == 'currency':
+            if type_ == "currency":
                 data = get_all_currencies()
-            elif type_ == 'share':
+            elif type_ == "share":
                 data = get_all_shares()
             else:
                 return f"Error: Incorrect type"
             data_list = create_data_frame(data)
-            filtered_data = data_list[data_list['ticker'] == ticker]
+            filtered_data = data_list[data_list["ticker"] == ticker]
             if filtered_data.empty:
                 return None
             else:
-                figi = filtered_data['figi'].iloc[0]
+                figi = filtered_data["figi"].iloc[0]
                 return figi
         except Exception as e:
             return f"In function get_figi_by_ticker \n {e}"
@@ -64,9 +72,10 @@ def get_info_about_share_by_ticker(ticker, type_):
     with Client(token) as client:
         try:
             figi = get_figi_by_ticker(ticker, type_)
-            instrument = client.instruments.share_by(id=figi,
-                                                     id_type=InstrumentIdType.INSTRUMENT_ID_TYPE_FIGI).instrument
-            data_frame = DataFrame([instrument], columns=['ticker', 'figi', 'name'])
+            instrument = client.instruments.share_by(
+                id=figi, id_type=InstrumentIdType.INSTRUMENT_ID_TYPE_FIGI
+            ).instrument
+            data_frame = DataFrame([instrument], columns=["ticker", "figi", "name"])
             return data_frame
         except Exception as e:
             return f"In function get_info_about_share \n {e}"
@@ -76,16 +85,18 @@ def get_info_about_share_by_figi(figi):
     # return DataFrame
     with Client(token) as client:
         try:
-            instrument = client.instruments.share_by(id=figi,
-                                                     id_type=InstrumentIdType.INSTRUMENT_ID_TYPE_FIGI).instrument
-            data_frame = DataFrame([instrument], columns=['ticker', 'figi', 'name'])
+            instrument = client.instruments.share_by(
+                id=figi, id_type=InstrumentIdType.INSTRUMENT_ID_TYPE_FIGI
+            ).instrument
+            data_frame = DataFrame([instrument], columns=["ticker", "figi", "name"])
             return data_frame
         except Exception as e:
             return f"In function get_info_about_share_by_figi \n {e}"
 
 
-def get_history_of_current_share_by_ticker(ticker, type_, start_time, end_time,
-                                           interval=CandleInterval.CANDLE_INTERVAL_HOUR):
+def get_history_of_current_share_by_ticker(
+    ticker, type_, start_time, end_time, interval=CandleInterval.CANDLE_INTERVAL_HOUR
+):
     # type_ - currency or share
 
     # start_time - type: google.protobuf.Timestamp - начало запрашиваемого периода в часовом поясе UTC.
@@ -103,17 +114,14 @@ def get_history_of_current_share_by_ticker(ticker, type_, start_time, end_time,
 
     with Client(token) as client:
         try:
-            if type_ == 'currency':
+            if type_ == "currency":
                 data = get_all_currencies()
-            elif type_ == 'share':
+            elif type_ == "share":
                 data = get_all_shares()
             else:
                 return f"Error: Incorrect type"
             instrument = client.market_data.get_candles(
-                figi=figi,
-                from_=start_time,
-                to=end_time,
-                interval=interval
+                figi=figi, from_=start_time, to=end_time, interval=interval
             )
             candles = instrument.candles
             data_list = create_data_list(candles)
@@ -122,8 +130,9 @@ def get_history_of_current_share_by_ticker(ticker, type_, start_time, end_time,
             return f"In function get_history_of_current_currency \n {e}"
 
 
-def get_history_of_current_share_by_figi(figi, type_, start_time, end_time,
-                                         interval=CandleInterval.CANDLE_INTERVAL_HOUR):
+def get_history_of_current_share_by_figi(
+    figi, type_, start_time, end_time, interval=CandleInterval.CANDLE_INTERVAL_HOUR
+):
     # type_ - currency or share
 
     # start_time - type: google.protobuf.Timestamp - начало запрашиваемого периода в часовом поясе UTC.
@@ -139,17 +148,14 @@ def get_history_of_current_share_by_figi(figi, type_, start_time, end_time,
 
     with Client(token) as client:
         try:
-            if type_ == 'currency':
+            if type_ == "currency":
                 data = get_all_currencies()
-            elif type_ == 'share':
+            elif type_ == "share":
                 data = get_all_shares()
             else:
                 return f"Error: Incorrect type"
             instrument = client.market_data.get_candles(
-                figi=figi,
-                from_=start_time,
-                to=end_time,
-                interval=interval
+                figi=figi, from_=start_time, to=end_time, interval=interval
             )
             candles = instrument.candles
             data_list = create_data_list(candles)
@@ -159,14 +165,17 @@ def get_history_of_current_share_by_figi(figi, type_, start_time, end_time,
 
 
 def create_data_list(candles: [HistoricCandle]):
-    data_list = [{
-        'time': current.time,
-        'volume': current.volume,
-        'open': convert_to_rubles(current.open),
-        'close': convert_to_rubles(current.close),
-        'high': convert_to_rubles(current.high),
-        'low': convert_to_rubles(current.low),
-    } for current in candles]
+    data_list = [
+        {
+            "time": current.time,
+            "volume": current.volume,
+            "open": convert_to_rubles(current.open),
+            "close": convert_to_rubles(current.close),
+            "high": convert_to_rubles(current.high),
+            "low": convert_to_rubles(current.low),
+        }
+        for current in candles
+    ]
 
     return data_list
 
