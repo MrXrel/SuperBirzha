@@ -4,12 +4,18 @@ from server import models, login_manager
 from .forms.Registration import RegistrationForm
 from .forms.Login import LoginForm
 from flask_login import login_user, current_user, login_required
+from werkzeug.security import generate_password_hash, check_password_hash
 
 
 @login_manager.user_loader
 def load_user(user_id):
     if len(USERS) != 0:
         return models.UserLogin().fromDB(user_id)
+
+
+@app.route("/test")
+def test():
+    return render_template("pettern_currencies.html")
 
 
 # Начальная страница
@@ -31,10 +37,11 @@ def get_private_office():
 def user_registration():
     form = RegistrationForm()
     if form.validate_on_submit():
+        hash = generate_password_hash(form.password.data)
         user = models.User(
             len(USERS),
             form.email.data,
-            form.password.data,
+            hash,
             form.second_name.data,
             form.name.data,
         )
@@ -55,7 +62,7 @@ def post_user_authorization():
     psw = request.form["password"]
     for i in USERS:
         print(i.email, i._password)
-        if i.email == email and i._password == psw:
+        if i.email == email and check_password_hash(i._password, psw):
             user = i
             userlogin = models.UserLogin().create(user)
             login_user(userlogin)

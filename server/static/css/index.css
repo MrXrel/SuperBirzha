@@ -90,7 +90,7 @@ input[type="submit"]:hover {
 }
 
 #account{
-    text-align: right;;
+    text-align: right;
 }
 
 #front {
@@ -120,4 +120,63 @@ footer {
     position: fixed;
     bottom: 0;
     width: 100%;
+}
+
+#currencies {
+    color: #000000;
+    font-size: 23px;
+}
+
+#code {
+    color: #CCCE;
+    font-size: 23px;
+    text-align: center;
+}
+
+#aboutcurrencies {
+    display: flex;
+    width:800px auto;
+    height:400px auto;
+    padding: 20px;
+    background:#fff;
+    border-radius: 20px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    position: relative;
+    top: 30px;
+}
+
+.buysell_position {
+    display: flex;
+    flex-direction: row;
+    padding: 10px;
+
+}
+
+.button_to_buy {
+    display: flex;
+    text-align: center;
+    display: inline-block;
+    width:800px;
+    height:100px;
+    padding: 20px;
+    background:#2cc621;
+    border-radius: 20px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    position: relative;
+    top: 20px;
+    
+}
+
+.button_to_sell {
+    display: flex;
+    text-align: center;
+    display: inline-block;
+    width:800px;
+    height:100px;
+    padding: 20px;
+    background:#c62121;
+    border-radius: 20px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    position: relative;
+    top: 20px;
 }
