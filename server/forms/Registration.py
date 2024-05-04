@@ -8,7 +8,7 @@ class RegistrationForm(FlaskForm):
         validators=[DataRequired(), Length(min=3, max=20)],
         render_kw={"placeholder": "Имя"},
     )
-    second_name = StringField(
+    surname = StringField(
         validators=[DataRequired(), Length(min=3, max=30)],
         render_kw={"placeholder": "Фамилия"},
     )
