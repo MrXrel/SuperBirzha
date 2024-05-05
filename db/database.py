@@ -43,9 +43,9 @@ class Database:
         )
         try:
             r = self.conn.execute(ins)
-            return r.inserted_primary_key
+            return r.inserted_primary_key  # id добавленного пользователя
         except Exception:
-            return 0
+            return 0  # 0 если добавить не получилось (уже есть такой email)
 
     def add_currency(self, price: float, name: str) -> int:
         ins = insert(self.currency).values(
@@ -54,28 +54,39 @@ class Database:
         )
         try:
             r = self.conn.execute(ins)
-            return r.inserted_primary_key
+            return r.inserted_primary_key  # id добавленной валюты
         except Exception:
-            return 0
+            return 0  # 0 если добавить не получилось (уже есть такая валюта)
 
-    def get_data_by_id(self, user_id: int) -> dict:
+    def get_user_data_by_id(self, user_id: int) -> dict:
         s = select(self.users).where(
             self.users.c.ID == user_id
         )
         r = self.conn.execute(s)
         p = r.fetchall()[0]
         return {key: value for key, value in zip(self.user_keys, p)}
+        # словарь с полями 'ID', 'email', 'password', 'surname', 'name', 'balance', 'time_to_note'
 
-    def get_data_by_email(self, email: str) -> dict:
+    def get_user_data_by_email(self, email: str) -> dict:
         s = select(self.users).where(
             self.users.c.email == email
         )
         r = self.conn.execute(s)
         p = r.fetchall()[0]
         return {key: value for key, value in zip(self.user_keys, p)}
+        # словарь с полями 'ID', 'email', 'password', 'surname', 'name', 'balance', 'time_to_note'
+
+    def get_operation_data_by_id(self, user_id: int) -> dict:
+        s = select(self.operations).where(
+            self.operations.c.ID == user_id
+        )
+        r = self.conn.execute(s)
+        p = r.fetchall()[0]
+        return {key: value for key, value in zip(self.operations_keys, p)}
 
     def add_operation(self, user_id: int, currency_id: int,
-                      type_of_operation: str, quantity: float,
+                      type_of_operation: str,  # в type_of_operation передавать 'BUY' или 'SELL'
+                      quantity: float,  # количество валюты
                       time_of_operation: datetime) -> int:
         price = self.conn.execute(select(self.currency.c.price).where(
             self.currency.c.ID == currency_id
@@ -106,9 +117,9 @@ class Database:
         ).values(
             balance=old_balance + price * quantity * k
         ))
-        return r.inserted_primary_key
+        return r.inserted_primary_key  # id операции
 
-    def update_currency(self, new_values: dict):
+    def update_currency(self, new_values: dict):  # принимает словарь вида {название валюты: новая цена}
         for currency_name, price in new_values.items():
             self.conn.execute(update(self.currency).where(
                 self.currency.c.currency_name == currency_name
@@ -133,6 +144,8 @@ class Database:
         for row in rows:
             history.append({key: value for key, value in zip(self.operations_keys, row)})
         return history
+        # список из словарей с полями 'ID', 'user_ID', 'currency_ID',
+        # 'price' (цена в момент покупки), 'quantity' (количество валюты), 'type_of_operation', 'time'
 
     def get_briefcase_by_id(self, user_id) -> dict:
         all_operations = self.conn.execute(select(self.operations).where(
@@ -158,3 +171,11 @@ class Database:
                                                d[currency]['purchase_amount']
 
         return d
+        # словарь вида {название валюты: словарь}
+        # внутренний словарь имеет поля:
+        # 'quantity' (количество валюты у пользователя),
+        # 'purchase_amount' (общая сумма, за которую была куплена валюта),
+        # 'selling_amount' (сумма, за которую сейчас можно продать всю имеющуюся валюту)
+        # 'profitability' (доходность в десятичном виде)
+        #
+        # например количество купленных долларов можно получить как d['dollar']['quantity']
