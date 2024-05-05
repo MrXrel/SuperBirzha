@@ -58,20 +58,6 @@ class Database:
         except Exception:
             return 0
 
-    def print_all_users(self):  # для отладки
-        s = select(self.users)
-        rs = self.conn.execute(s)
-        print("Users")
-        for row in rs:
-            print(row)
-
-    def print_all_cur(self):  # для отладки
-        s = select(self.currency)
-        rs = self.conn.execute(s)
-        print("Currency")
-        for row in rs:
-            print(row)
-
     def get_data_by_id(self, user_id: int) -> dict:
         s = select(self.users).where(
             self.users.c.ID == user_id
@@ -130,10 +116,15 @@ class Database:
                 price=price
             ))
 
-    def get_history_by_id(self, user_id: int, number_of_rows: int = -1) -> list:
-        r = self.conn.execute(select(self.operations).where(
-            self.operations.c.user_ID == user_id
-        ).order_by(desc(self.operations.c.ID)))
+    def get_history_by_id(self, user_id: int, number_of_rows: int = -1, reverse: bool = False) -> list:
+        if reverse:
+            r = self.conn.execute(select(self.operations).where(
+                self.operations.c.user_ID == user_id
+            ))
+        else:
+            r = self.conn.execute(select(self.operations).where(
+                self.operations.c.user_ID == user_id
+            ).order_by(desc(self.operations.c.ID)))
         history = []
         if number_of_rows == -1:
             rows = r.fetchall()
@@ -142,3 +133,28 @@ class Database:
         for row in rows:
             history.append({key: value for key, value in zip(self.operations_keys, row)})
         return history
+
+    def get_briefcase_by_id(self, user_id) -> dict:
+        all_operations = self.conn.execute(select(self.operations).where(
+            self.operations.c.user_ID == user_id
+        ))
+        d = {key[0]: {'quantity': 0, 'purchase_amount': 0, 'selling_amount': 0, 'profitability': 0} for key in
+             self.conn.execute(select(self.currency.c.currency_name)).fetchall()}
+
+        for row in all_operations.fetchall():
+            currency_name = self.conn.execute(select(self.currency.c.currency_name).where(
+                self.currency.c.ID == row[2]
+            )).fetchall()[0][0]
+            d[currency_name]['quantity'] += row[4]
+            d[currency_name]['purchase_amount'] += row[4] * row[3]
+
+        for currency in d.keys():
+            d[currency]['selling_amount'] = d[currency]['quantity'] * \
+                                            self.conn.execute(select(self.currency.c.price).where(
+                                                self.currency.c.currency_name == currency)
+                                            ).fetchall()[0][0]
+            if d[currency]['quantity'] > 0:
+                d[currency]['profitability'] = (d[currency]['selling_amount'] - d[currency]['purchase_amount']) / \
+                                               d[currency]['purchase_amount']
+
+        return d
