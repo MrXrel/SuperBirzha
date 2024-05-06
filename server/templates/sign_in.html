@@ -5,12 +5,13 @@
 {% block sign %}
     <div class="container">
         <h2>Вход</h2>
-        <form action="/login" method="post">
-            <input type="text" name="username" placeholder="Имя пользователя" required>
-            <input type="password" name="password" placeholder="Пароль" required>
-            <input type="submit" value="Войти">
+        <form action="" method="post">
+            {{ form.hidden_tag() }}
+            <p>{{ form.email() }}
+            <p>{{ form.password() }}
+            <p>{{ form.submit() }}
             <center><a1><em>Если нет аккаунта, то регистрация ниже)</em></a1></center>
-            <center><a href="{{ url_for('get_reg') }}"><em>Регистрация</em></a></center>
+            <center><a href="{{ url_for('user_registration') }}"><em>Регистрация</em></a></center>
         </form>
     </div>
 {% endblock %}
