@@ -5,8 +5,9 @@
 {% block sign %}
     <center>
         <div id="persacc">
-            <div><h4>Счёт в Рублях:</h4><span>10 000</span> ₽</div>
-            <div id="account"><p>ФИО</p></div>
+            <div><h4>Счёт в Рублях:</h4><span>{{ user.get_balance() }}</span> ₽</div>
+            <div id="account"><p>{{ user.get_name() }}  {{user.get_surname()}}</p></div>
+            <div><p><a href = "{{ url_for('user_logout') }}">Выйти из профиля</a></p></div>
         </div>
         <div id="currectangle">
             <table class="table">
