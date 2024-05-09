@@ -15,8 +15,8 @@ header {
 }
 
 #rectangleAboutUs{
-    width:600px;
-    height:250px auto;
+    width: 600px;
+    height: 250px auto;
     padding: 20px;
     background:#fff;
     border-radius: 10px;
@@ -36,6 +36,7 @@ header {
 h2 {
     text-align: center;
 }
+
 
 h5 {
     text-align: center;
@@ -67,8 +68,10 @@ input[type="submit"]:hover {
 
 #persacc {
     display: flex;
-    width:800px auto;
-    height:200px auto;
+    align-items: center;
+    justify-content: space-between;
+    width: 800px auto;
+    height: 200px auto;
     padding: 20px;
     background:#fff;
     border-radius: 20px;
@@ -79,8 +82,8 @@ input[type="submit"]:hover {
 
 #currectangle {
     display: flex;
-    width:800px auto;
-    height:250px auto;
+    width: 800px auto;
+    height: 250px auto;
     padding: 20px;
     background:#fff;
     border-radius: 20px;
@@ -89,9 +92,6 @@ input[type="submit"]:hover {
     top: 20px;
 }
 
-#account{
-    text-align: right;
-}
 
 #front {
     font-size: 23px;
@@ -156,10 +156,10 @@ footer {
     display: flex;
     text-align: center;
     display: inline-block;
-    width:800px;
-    height:100px;
+    width: 135px;
+    height: 75px;
     padding: 20px;
-    background:#2cc621;
+    background:#29d51ce3;
     border-radius: 20px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     position: relative;
@@ -171,12 +171,30 @@ footer {
     display: flex;
     text-align: center;
     display: inline-block;
-    width:800px;
-    height:100px;
+    width:135px;
+    height:75px;
     padding: 20px;
-    background:#c62121;
+    background:#d43030e6;
     border-radius: 20px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     position: relative;
     top: 20px;
+}
+
+.container {
+    width: 1000px;
+    margin: 150px auto;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.contain {
+    width: 1000px;
+    margin: 150px auto;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
