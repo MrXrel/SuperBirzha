@@ -6,10 +6,11 @@ from tinkoff.invest import (
     HistoricCandle,
 )
 from pandas import DataFrame
-from config import token
 
 all_shares = None
 all_currencies = None
+
+token = "t.IEa99GPRoD0m0Z3MH_M2BUMIAVsqYMCpcmJhQFIKDw8rg3tk7CpENgicqyVpOMSTK1ubCt1ZB7SQCXTcEy0Dcw"
 
 
 def get_all_shares():
@@ -46,7 +47,7 @@ def create_data_frame(instrument):
     return data_frame
 
 
-def get_figi_by_ticker(ticker, type_):
+def get_figi_by_ticker(ticker, type_):  #'AMDRUB_TOM'
     # type_ - currency of share
     with Client(token) as client:
         try:
