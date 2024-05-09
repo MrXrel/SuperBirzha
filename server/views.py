@@ -36,7 +36,7 @@ def user_registration():
     form = RegistrationForm()
     if form.validate_on_submit():
         hash = generate_password_hash(form.password.data)
-        if hash == generate_password_hash(form.password_confrim.data):
+        if check_password_hash(hash, form.password_confirm.data):
             dbase.create_user(form.email.data, hash, form.surname.data, form.name.data)
             return redirect(url_for("get_user_authorization"), 301)
     return render_template("sign_up.html", form=form)

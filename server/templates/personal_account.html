@@ -5,8 +5,8 @@
 {% block sign %}
     <center>
         <div id="persacc">
-            <div><h4>Счёт в Рублях:</h4>100 000 ₽</div>
-            <div><h5><b>Иванов Иван Иванович</b></h5>
+            <div><h4>Счёт в Рублях:</h4>{{ user.get_balance() }}</div>
+            <div><h5><b>{{ user.get_name() }} {{ user.get_surname() }}</b></h5>
                 <div><a href="#"><em>Выход</em></a></div>
             </div>
         </div>
