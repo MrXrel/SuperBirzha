@@ -156,10 +156,10 @@ footer {
     display: flex;
     text-align: center;
     display: inline-block;
-    width: 135px;
-    height: 75px;
+    width: 120px;
+    height: 65px;
     padding: 20px;
-    background:#29d51ce3;
+    background:#a3e9a4;
     border-radius: 20px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     position: relative;
@@ -171,12 +171,12 @@ footer {
     display: flex;
     text-align: center;
     display: inline-block;
-    width:135px;
-    height:75px;
+    width:120px;
+    height:65px;
     padding: 20px;
-    background:#d43030e6;
+    background:#fa8072;
     border-radius: 20px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
     position: relative;
     top: 20px;
 }
