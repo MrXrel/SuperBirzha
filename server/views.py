@@ -36,8 +36,9 @@ def user_registration():
     form = RegistrationForm()
     if form.validate_on_submit():
         hash = generate_password_hash(form.password.data)
-        dbase.create_user(form.email.data, hash, form.surname.data, form.name.data)
-        return redirect(url_for("get_user_authorization"), 301)
+        if hash == generate_password_hash(form.password_confrim.data):
+            dbase.create_user(form.email.data, hash, form.surname.data, form.name.data)
+            return redirect(url_for("get_user_authorization"), 301)
     return render_template("sign_up.html", form=form)
 
 
@@ -53,7 +54,7 @@ def get_user_authorization():
 def post_user_authorization():
     email = request.form["email"]
     psw = request.form["password"]
-    user = dbase.get_data_by_email(email)
+    user = dbase.get_user_data_by_email(email)
     print(user)
     if check_password_hash(user["password"], psw):
         userlogin = models.UserLogin().create(user)
