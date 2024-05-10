@@ -7,13 +7,10 @@ from tinkoff.invest import (
 )
 from pandas import DataFrame
 import pandas as pd
-from google.protobuf import timestamp_pb2
-import datetime
+from datetime import datetime, timedelta
 
 all_currencies = None
-
 token = "t.IEa99GPRoD0m0Z3MH_M2BUMIAVsqYMCpcmJhQFIKDw8rg3tk7CpENgicqyVpOMSTK1ubCt1ZB7SQCXTcEy0Dcw"
-
 #             TICKER        FIGI
 # ЗОЛОТО     GLDRUB_TOM    BBG000VJ5YR4
 # ДОЛЛАР     USD000000TOD  TCS0013HGFT4
@@ -83,7 +80,7 @@ def get_info_about_currency_by_figi(figi):
             return f"In function get_info_about_share_by_figi \n {e}"
 
 
-def get_history_of_current_share_by_ticker(
+def get_history_of_current_currency_by_ticker(
     ticker, start_time, end_time, interval=CandleInterval.CANDLE_INTERVAL_HOUR
 ):
 
@@ -128,12 +125,15 @@ def get_history_of_current_share_by_figi(
     # CANDLE_INTERVAL_WEEK	    от 1 недели до 2 лет.
 
     with Client(token) as client:
-        instrument = client.market_data.get_candles(
-            figi=figi, from_=start_time, to=end_time, interval=interval
-        )
-        candles = instrument.candles
-        data_list = create_data_list(candles)
-        return data_list
+        try:
+            instrument = client.market_data.get_candles(
+                figi=figi, from_=start_time, to=end_time, interval=interval
+            )
+            candles = instrument.candles
+            data_list = create_data_list(candles)
+            return data_list
+        except Exception as e:
+            return f"In function get_history_of_current_currency \n {e}"
 
 
 def create_data_list(candles: [HistoricCandle]):
@@ -157,12 +157,8 @@ def convert_to_rubles(current_candle):
 
 
 if __name__ == "__main__":
-    print(create_data_frame(get_all_currencies()))
     print(
         get_history_of_current_share_by_figi(
-            "TCS0013HGFT4",
-            datetime.datetime.utcnow() - datetime.timedelta(days=7),
-            datetime.datetime.utcnow(),
-            CandleInterval.CANDLE_INTERVAL_HOUR,
+            "USD000UTSTOM", datetime.utcnow() - timedelta(days=7), datetime.utcnow()
         )
     )
