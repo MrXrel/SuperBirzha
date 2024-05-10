@@ -1,22 +1,18 @@
+
 from tinkoff.invest import InstrumentIdType, InstrumentStatus, CandleInterval, Client, HistoricCandle
 from pandas import DataFrame
+import pandas as pd
 from config import token
+import datetime
 
-all_shares = None
 all_currencies = None
 
+#             TICKER        FIGI
+# ЗОЛОТО     GLDRUB_TOM    BBG000VJ5YR4
+# ДОЛЛАР     USD000000TOD  TCS0013HGFT4
+# ЮАНЬ       CNYRUB_TMS    TCS3013HRTL0
+# ЕВРО       EUR_RUB__TOM  BBG0013HJJ31
 
-def get_all_shares():
-    # return array with all shares
-
-    global all_shares
-    with Client(token) as client:
-        try:
-            all_shares = client.instruments.shares(
-                instrument_status=InstrumentStatus.INSTRUMENT_STATUS_BASE).instruments
-            return all_shares
-        except Exception as e:
-            return f"In function get_all_shares \n {e}"
 
 
 def get_all_currencies():
@@ -35,19 +31,14 @@ def get_all_currencies():
 def create_data_frame(instrument):
     # return very beautiful data_frame for convenience
     data_frame = DataFrame(instrument, columns=['ticker', 'figi', 'name'])
+    pd.set_option('display.max_rows', None)
     return data_frame
 
 
-def get_figi_by_ticker(ticker, type_):
-    # type_ - currency of share
+def get_figi_by_ticker(ticker):
     with Client(token) as client:
         try:
-            if type_ == 'currency':
-                data = get_all_currencies()
-            elif type_ == 'share':
-                data = get_all_shares()
-            else:
-                return f"Error: Incorrect type"
+            data = get_all_currencies()
             data_list = create_data_frame(data)
             filtered_data = data_list[data_list['ticker'] == ticker]
             if filtered_data.empty:
@@ -59,34 +50,32 @@ def get_figi_by_ticker(ticker, type_):
             return f"In function get_figi_by_ticker \n {e}"
 
 
-def get_info_about_share_by_ticker(ticker, type_):
+def get_info_about_currency_by_ticker(ticker):
     # return DataFrame
     with Client(token) as client:
         try:
-            figi = get_figi_by_ticker(ticker, type_)
-            instrument = client.instruments.share_by(id=figi,
+            figi = get_figi_by_ticker(ticker)
+            instrument = client.instruments.currency_by(id=figi,
                                                      id_type=InstrumentIdType.INSTRUMENT_ID_TYPE_FIGI).instrument
-            data_frame = DataFrame([instrument], columns=['ticker', 'figi', 'name'])
-            return data_frame
+            return instrument
         except Exception as e:
             return f"In function get_info_about_share \n {e}"
 
 
-def get_info_about_share_by_figi(figi):
+def get_info_about_currency_by_figi(figi):
     # return DataFrame
     with Client(token) as client:
         try:
-            instrument = client.instruments.share_by(id=figi,
+            instrument = client.instruments.currency_by(id=figi,
                                                      id_type=InstrumentIdType.INSTRUMENT_ID_TYPE_FIGI).instrument
-            data_frame = DataFrame([instrument], columns=['ticker', 'figi', 'name'])
-            return data_frame
+            # data_frame = DataFrame([instrument], columns=['ticker', 'figi', 'name'])
+            return instrument
         except Exception as e:
             return f"In function get_info_about_share_by_figi \n {e}"
 
 
-def get_history_of_current_share_by_ticker(ticker, type_, start_time, end_time,
+def get_history_of_current_share_by_ticker(ticker, start_time, end_time,
                                            interval=CandleInterval.CANDLE_INTERVAL_HOUR):
-    # type_ - currency or share
 
     # start_time - type: google.protobuf.Timestamp - начало запрашиваемого периода в часовом поясе UTC.
     # E.G. start_time = datetime.utcnow() - timedelta(hours=10),
@@ -99,16 +88,10 @@ def get_history_of_current_share_by_ticker(ticker, type_, start_time, end_time,
     # CANDLE_INTERVAL_DAY	    от 1 дня до 1 года.
     # CANDLE_INTERVAL_WEEK	    от 1 недели до 2 лет.
 
-    figi = get_figi_by_ticker(ticker, type_)
+    figi = get_figi_by_ticker(ticker)
 
     with Client(token) as client:
         try:
-            if type_ == 'currency':
-                data = get_all_currencies()
-            elif type_ == 'share':
-                data = get_all_shares()
-            else:
-                return f"Error: Incorrect type"
             instrument = client.market_data.get_candles(
                 figi=figi,
                 from_=start_time,
@@ -122,9 +105,8 @@ def get_history_of_current_share_by_ticker(ticker, type_, start_time, end_time,
             return f"In function get_history_of_current_currency \n {e}"
 
 
-def get_history_of_current_share_by_figi(figi, type_, start_time, end_time,
+def get_history_of_current_share_by_figi(figi, start_time, end_time,
                                          interval=CandleInterval.CANDLE_INTERVAL_HOUR):
-    # type_ - currency or share
 
     # start_time - type: google.protobuf.Timestamp - начало запрашиваемого периода в часовом поясе UTC.
     # E.G. start_time = datetime.utcnow() - timedelta(hours=10),
@@ -139,12 +121,6 @@ def get_history_of_current_share_by_figi(figi, type_, start_time, end_time,
 
     with Client(token) as client:
         try:
-            if type_ == 'currency':
-                data = get_all_currencies()
-            elif type_ == 'share':
-                data = get_all_shares()
-            else:
-                return f"Error: Incorrect type"
             instrument = client.market_data.get_candles(
                 figi=figi,
                 from_=start_time,
@@ -172,4 +148,9 @@ def create_data_list(candles: [HistoricCandle]):
 
 
 def convert_to_rubles(current_candle):
-    return current_candle.units + current_candle.nano / 1e9  # nano - 9 нулей
+    return current_candle.units + current_candle.nano / 1e9  # nano - 9 zeroes
+
+#
+# if __name__ == '__main__':
+#     print(create_data_frame(get_all_currencies()))
+#     print(get_info_about_currency_by_figi('BBG0013J12N1'))
