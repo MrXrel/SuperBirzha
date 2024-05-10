@@ -1,0 +1,182 @@
+html, body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f2f2f2;
+}
+
+header {
+    background-color: #377DFF;
+    color: #fff;
+    padding: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+#rectangleAboutUs{
+    width:600px;
+    height:250px auto;
+    padding: 20px;
+    background:#fff;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    place-items: center;
+}
+
+.container {
+    width: 400px;
+    margin: 150px auto;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+h2 {
+    text-align: center;
+}
+
+h5 {
+    text-align: center;
+}
+
+input[type="text"],
+input[type="password"],
+input[type="submit"] {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+}
+
+input[type="submit"] {
+    background-color: #337DFF;
+    color: #fff;
+    cursor: pointer;
+}
+
+input[type="submit"]:hover {
+    background-color: #1f5bc2;
+}
+
+.nav-link {
+    color : white;
+}
+
+#persacc {
+    display: flex;
+    width:800px auto;
+    height:200px auto;
+    padding: 20px;
+    background:#fff;
+    border-radius: 20px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    position: relative;
+    top: 10px;
+}
+
+#currectangle {
+    display: flex;
+    width:800px auto;
+    height:250px auto;
+    padding: 20px;
+    background:#fff;
+    border-radius: 20px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    position: relative;
+    top: 20px;
+}
+
+#account{
+    text-align: right;
+}
+
+#front {
+    font-size: 23px;
+}
+
+#back {
+    font-size: 10px;
+}
+
+.color-change-link {
+    color: #CCCE;
+    text-decoration: none;
+    transition: color 0.3s ease-in-out;
+}
+
+.color-change-link:hover {
+    color: #000000;
+}
+
+
+footer {
+    background-color: #141212;
+    color: #fff;
+    padding: 10px 0;
+    text-align: center;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+}
+
+#currencies {
+    color: #000000;
+    font-size: 23px;
+}
+
+#code {
+    color: #CCCE;
+    font-size: 23px;
+    text-align: center;
+}
+
+#aboutcurrencies {
+    display: flex;
+    width:800px auto;
+    height:400px auto;
+    padding: 20px;
+    background:#fff;
+    border-radius: 20px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    position: relative;
+    top: 30px;
+}
+
+.buysell_position {
+    display: flex;
+    flex-direction: row;
+    padding: 10px;
+
+}
+
+.button_to_buy {
+    display: flex;
+    text-align: center;
+    display: inline-block;
+    width:800px;
+    height:100px;
+    padding: 20px;
+    background:#2cc621;
+    border-radius: 20px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    position: relative;
+    top: 20px;
+    
+}
+
+.button_to_sell {
+    display: flex;
+    text-align: center;
+    display: inline-block;
+    width:800px;
+    height:100px;
+    padding: 20px;
+    background:#c62121;
+    border-radius: 20px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    position: relative;
+    top: 20px;
+}

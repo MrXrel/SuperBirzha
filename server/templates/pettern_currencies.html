@@ -1,0 +1,50 @@
+{% extends 'layout.html' %}
+
+{% block title %}...{% endblock %} <!-- Тут напишешь выбранную валюту-->
+
+{% block sign %}
+    <center>
+        <div id="persacc">
+            <center>
+                <div id="currencies"><h2><b>Валюта</b></h2></div>
+                <div id="code"><h5>Код валюты</h5></div>
+            </center>
+        </div>
+        <div id="currectangle">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th scope="col">Название</th>
+                        <th scope="col">В валюте</th>
+                        <th scope="col">За всё время</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <th scope="row"><div id="front">Валюта</div><a href="#" class="color-change-link">Код волюты</a></th>
+                        <td><span>0</an> $</td>
+                        <td><div><span>0</span> ₽</div> 
+                        <div id="back">0 %</div></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="buysell_position">
+            <button class="button_to_buy">
+                <h3>Купить</h3>
+            </button>
+            <button class="button_to_sell">
+                <h3>Продать</h3>
+            </button>
+        </div>
+        <div id="aboutcurrencies">
+            <div><h2><b>О Валюте</b></h2>
+                <div>
+                    <p>информация о ней</p> <!-- при добавлении информации О валюте будет
+                         в центре (как и задумывалось)-->
+                </div>
+            </div>
+            
+        </div>
+    </center>
+{% endblock %}
