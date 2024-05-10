@@ -3,7 +3,7 @@ from tinkoff.invest import InstrumentIdType, InstrumentStatus, CandleInterval, C
 from pandas import DataFrame
 import pandas as pd
 from config import token
-import datetime
+from datetime import datetime, timedelta
 
 all_currencies = None
 
@@ -74,7 +74,7 @@ def get_info_about_currency_by_figi(figi):
             return f"In function get_info_about_share_by_figi \n {e}"
 
 
-def get_history_of_current_share_by_ticker(ticker, start_time, end_time,
+def get_history_of_current_currency_by_ticker(ticker, start_time, end_time,
                                            interval=CandleInterval.CANDLE_INTERVAL_HOUR):
 
     # start_time - type: google.protobuf.Timestamp - начало запрашиваемого периода в часовом поясе UTC.
@@ -150,7 +150,5 @@ def create_data_list(candles: [HistoricCandle]):
 def convert_to_rubles(current_candle):
     return current_candle.units + current_candle.nano / 1e9  # nano - 9 zeroes
 
-#
-# if __name__ == '__main__':
-#     print(create_data_frame(get_all_currencies()))
-#     print(get_info_about_currency_by_figi('BBG0013J12N1'))
+if __name__ == '__main__':
+    print(get_history_of_current_share_by_figi('USD000UTSTOM', datetime.utcnow() - timedelta(days=7), datetime.utcnow()))
