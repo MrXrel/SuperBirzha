@@ -3,7 +3,7 @@ from flask_login import LoginManager
 from db import database
 import os
 
-DATABASE = "/SuperBirzha/superbirzha.db"
+DATABASE = "db/superbirzha.db"
 SECRET_KEY = "KETUNREAL"  # Запилить конфиг-файл надо будет
 
 app = Flask(__name__)

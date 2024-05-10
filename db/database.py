@@ -6,7 +6,7 @@ import os
 class Database:
     def __init__(self):
         self.engine = create_engine(
-            "sqlite:///superbirzha.db", isolation_level="AUTOCOMMIT"
+            "sqlite:///db/superbirzha.db", isolation_level="AUTOCOMMIT"
         )
         self.conn = self.engine.connect()
         self.metadata = MetaData()

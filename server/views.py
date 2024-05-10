@@ -55,7 +55,6 @@ def post_user_authorization():
     email = request.form["email"]
     psw = request.form["password"]
     user = dbase.get_user_data_by_email(email)
-    print(user)
     if check_password_hash(user["password"], psw):
         userlogin = models.UserLogin().create(user)
         login_user(userlogin)
