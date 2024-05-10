@@ -33,6 +33,7 @@ class Database:
                               Column('price', Float(), nullable=False)
                               )
         self.metadata.create_all(self.engine)
+        self.currency_keys = ('ID', 'currency_name', 'price')
 
     def create_user(self, email: str, password: str, surname: str, name: str) -> int:
         ins = insert(self.users).values(
@@ -83,6 +84,14 @@ class Database:
         r = self.conn.execute(s)
         p = r.fetchall()[0]
         return {key: value for key, value in zip(self.operations_keys, p)}
+
+    def get_currency_data_by_id(self, user_id: int) -> dict:
+        s = select(self.currency).where(
+            self.currency.c.ID == user_id
+        )
+        r = self.conn.execute(s)
+        p = r.fetchall()[0]
+        return {key: value for key, value in zip(self.currency_keys, p)}
 
     def add_operation(self, user_id: int, currency_id: int,
                       type_of_operation: str,  # в type_of_operation передавать 'BUY' или 'SELL'
@@ -148,6 +157,16 @@ class Database:
         # 'price' (цена в момент покупки), 'quantity' (количество валюты), 'type_of_operation', 'time'
 
     def get_briefcase_by_id(self, user_id) -> dict:
+        """
+        возвращает словарь вида {название валюты: словарь}
+        внутренний словарь имеет поля:
+        'quantity' (количество валюты у пользователя),
+        'purchase_amount' (общая сумма, за которую была куплена валюта),
+        'selling_amount' (сумма, за которую сейчас можно продать всю имеющуюся валюту)
+        'profitability' (доходность в десятичном виде)
+
+        например количество долларов у пользователя можно получить как d['dollar']['quantity']
+        """
         all_operations = self.conn.execute(select(self.operations).where(
             self.operations.c.user_ID == user_id
         ))
@@ -158,8 +177,12 @@ class Database:
             currency_name = self.conn.execute(select(self.currency.c.currency_name).where(
                 self.currency.c.ID == row[2]
             )).fetchall()[0][0]
-            d[currency_name]['quantity'] += row[4]
-            d[currency_name]['purchase_amount'] += row[4] * row[3]
+            if row[5] == 'BUY':
+                d[currency_name]['quantity'] += row[4]
+                d[currency_name]['purchase_amount'] += row[4] * row[3]
+            else:
+                d[currency_name]['quantity'] -= row[4]
+                d[currency_name]['purchase_amount'] -= row[4] * row[3]
 
         for currency in d.keys():
             d[currency]['selling_amount'] = d[currency]['quantity'] * \
@@ -168,14 +191,6 @@ class Database:
                                             ).fetchall()[0][0]
             if d[currency]['quantity'] > 0:
                 d[currency]['profitability'] = (d[currency]['selling_amount'] - d[currency]['purchase_amount']) / \
-                                               d[currency]['purchase_amount']
+                                               abs(d[currency]['purchase_amount'])
 
         return d
-        # словарь вида {название валюты: словарь}
-        # внутренний словарь имеет поля:
-        # 'quantity' (количество валюты у пользователя),
-        # 'purchase_amount' (общая сумма, за которую была куплена валюта),
-        # 'selling_amount' (сумма, за которую сейчас можно продать всю имеющуюся валюту)
-        # 'profitability' (доходность в десятичном виде)
-        #
-        # например количество купленных долларов можно получить как d['dollar']['quantity']
