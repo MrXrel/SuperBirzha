@@ -5,9 +5,12 @@
 {% block sign %}
     <center>
         <div id="persacc">
-            <div><h4>Счёт в Рублях:</h4><span>{{ user.get_balance() }}</span> ₽</div>
-            <div id="account"><p>{{ user.get_name() }}  {{user.get_surname()}}</p></div>
-            <div><p><a href = "{{ url_for('user_logout') }}">Выйти из профиля</a></p></div>
+
+            <div><h4>Счёт в Рублях:</h4>100 000 ₽</div>
+            <div><h5><b>Иванов Иван Иванович</b></h5>
+                <div><a href="#"><em>Выход</em></a></div>
+            </div>
+      
         </div>
         <div id="currectangle">
             <table class="table">
@@ -21,7 +24,7 @@
                 <tbody>
                     <tr>
                         <th scope="row"><div id="front">Валюта</div><a href="#" class="color-change-link">Код волюты</a></th>
-                        <td><span>0</an> $</td>
+                        <td><span>0</span> $</td>
                         <td><div><span>0</span> ₽</div> 
                         <div id="back">0 %</div></td>
                     </tr>
