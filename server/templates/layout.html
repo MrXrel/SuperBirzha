@@ -15,13 +15,13 @@
         <h2 href="#">МАИ Инвестиции</h2>
         <ul class="nav justify-content-end">
             <li class="nav-item">
-            <a class="nav-link" href="#">О нас</a>
+            <a class="nav-link" href="{{ url_for('get_about_us') }}">О нас</a>
             </li>
             <li class="nav-item">
-            <a class="nav-link" href="#">Валюта</a>
+            <a class="nav-link" href="{{ url_for('get_currencies') }}">Валюта</a>
             </li>
             <li class="nav-item">
-            <a class="nav-link" href="#">Личный кабинет</a>
+                <a class="nav-link" href="{{ url_for('get_private_office') }}">Личный кабинет</a>
             </li>
         </ul>
     </header>
