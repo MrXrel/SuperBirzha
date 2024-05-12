@@ -36,6 +36,23 @@ class Database:
         self.currency_keys = ('ID', 'currency_name', 'price')
 
     def create_user(self, email: str, password: str, surname: str, name: str) -> int:
+        """
+        Создание нового пользователя
+
+        Parameters
+        ----------
+        email : str
+        password : str
+        surname : str
+        name : str
+
+        Returns
+        -------
+        int
+            id добавленного пользователя
+            0 если добавить не получилось (уже есть такой email)
+        """
+
         ins = insert(self.users).values(
             email=email,
             password=password,
@@ -44,59 +61,143 @@ class Database:
         )
         try:
             r = self.conn.execute(ins)
-            return r.inserted_primary_key  # id добавленного пользователя
+            return r.inserted_primary_key
         except Exception:
-            return 0  # 0 если добавить не получилось (уже есть такой email)
+            return 0
 
     def add_currency(self, price: float, name: str) -> int:
+        """
+        Добавление новой валюты
+
+        Parameters
+        ----------
+        price: float
+        name: str
+
+        Returns
+        -------
+        int
+            id добавленной валюты
+            0 если добавить не получилось (уже есть такая валюта)
+        """
+
         ins = insert(self.currency).values(
             price=price,
             currency_name=name
         )
         try:
             r = self.conn.execute(ins)
-            return r.inserted_primary_key  # id добавленной валюты
+            return r.inserted_primary_key
         except Exception:
-            return 0  # 0 если добавить не получилось (уже есть такая валюта)
+            return 0
 
     def get_user_data_by_id(self, user_id: int) -> dict:
+        """
+        Вывод всей информации о пользователе по его id
+
+        Parameters
+        ----------
+        user_id: int
+
+        Returns
+        -------
+        dict
+            словарь с полями 'ID', 'email', 'password', 'surname', 'name', 'balance', 'time_to_note'
+        """
+
         s = select(self.users).where(
             self.users.c.ID == user_id
         )
         r = self.conn.execute(s)
         p = r.fetchall()[0]
         return {key: value for key, value in zip(self.user_keys, p)}
-        # словарь с полями 'ID', 'email', 'password', 'surname', 'name', 'balance', 'time_to_note'
 
     def get_user_data_by_email(self, email: str) -> dict:
+        """
+        Вывод всей информации о пользователе по его email
+
+        Parameters
+        ----------
+        email: str
+
+        Returns
+        -------
+        dict
+            словарь с полями 'ID', 'email', 'password', 'surname', 'name', 'balance', 'time_to_note'
+        """
+
         s = select(self.users).where(
             self.users.c.email == email
         )
         r = self.conn.execute(s)
         p = r.fetchall()[0]
         return {key: value for key, value in zip(self.user_keys, p)}
-        # словарь с полями 'ID', 'email', 'password', 'surname', 'name', 'balance', 'time_to_note'
 
-    def get_operation_data_by_id(self, user_id: int) -> dict:
+    def get_operation_data_by_id(self, operation_id: int) -> dict:
+        """
+        Вывод всей информации об операции по её id
+
+        Parameters
+        ----------
+        operation_id: int
+
+        Returns
+        -------
+        dict
+            словарь с полями 'ID', 'user_ID', 'currency_ID', 'price', 'quantity', 'type_of_operation', 'time'
+        """
+
         s = select(self.operations).where(
-            self.operations.c.ID == user_id
+            self.operations.c.ID == operation_id
         )
         r = self.conn.execute(s)
         p = r.fetchall()[0]
         return {key: value for key, value in zip(self.operations_keys, p)}
 
-    def get_currency_data_by_id(self, user_id: int) -> dict:
+    def get_currency_data_by_id(self, currency_id: int) -> dict:
+        """
+        Вывод всей информации об операции по её id
+
+        Parameters
+        ----------
+        currency_id: int
+
+        Returns
+        -------
+        dict
+            словарь с полями 'ID', 'currency_name', 'price'
+        """
+
         s = select(self.currency).where(
-            self.currency.c.ID == user_id
+            self.currency.c.ID == currency_id
         )
         r = self.conn.execute(s)
         p = r.fetchall()[0]
         return {key: value for key, value in zip(self.currency_keys, p)}
 
     def add_operation(self, user_id: int, currency_id: int,
-                      type_of_operation: str,  # в type_of_operation передавать 'BUY' или 'SELL'
-                      quantity: float,  # количество валюты
+                      type_of_operation: str,
+                      quantity: float,
                       time_of_operation: datetime) -> int:
+        """
+        Выполнение операции с изменением баланса
+
+        Parameters
+        ----------
+        user_id: int
+        currency_id: int
+        type_of_operation: str
+            принимает значения 'BUY' или 'SELL'
+        quantity: float
+            количество валюты
+        time_of_operation: datetime
+
+        Returns
+        -------
+        int
+            id выполненной операции
+        """
+
         price = self.conn.execute(select(self.currency.c.price).where(
             self.currency.c.ID == currency_id
         )).fetchall()[0][0]
@@ -128,7 +229,16 @@ class Database:
         ))
         return r.inserted_primary_key  # id операции
 
-    def update_currency(self, new_values: dict):  # принимает словарь вида {название валюты: новая цена}
+    def update_currency(self, new_values: dict):
+        """
+        Обновляет цены всех валют
+
+        Parameters
+        ----------
+        new_values: dict
+            словарь вида {название валюты: новая цена}
+        """
+
         for currency_name, price in new_values.items():
             self.conn.execute(update(self.currency).where(
                 self.currency.c.currency_name == currency_name
@@ -137,6 +247,24 @@ class Database:
             ))
 
     def get_history_by_id(self, user_id: int, number_of_rows: int = -1, reverse: bool = False) -> list:
+        """
+        Получение истории операций по id пользователя
+
+        Parameters
+        ----------
+        user_id: int
+        number_of_rows: int
+            -1 - получение всех строк
+        reverse: bool
+            False - последние N операций
+            True - первые N операций
+
+        Returns
+        -------
+        list
+            список из словарей с полями 'ID', 'user_ID', 'currency_ID',
+            'price' (цена в момент покупки), 'quantity' (количество валюты), 'type_of_operation', 'time'
+        """
         if reverse:
             r = self.conn.execute(select(self.operations).where(
                 self.operations.c.user_ID == user_id
@@ -153,20 +281,29 @@ class Database:
         for row in rows:
             history.append({key: value for key, value in zip(self.operations_keys, row)})
         return history
-        # список из словарей с полями 'ID', 'user_ID', 'currency_ID',
-        # 'price' (цена в момент покупки), 'quantity' (количество валюты), 'type_of_operation', 'time'
 
-    def get_briefcase_by_id(self, user_id) -> dict:
+    def get_briefcase_by_id(self, user_id: int) -> dict:
         """
-        возвращает словарь вида {название валюты: словарь}
-        внутренний словарь имеет поля:
-        'quantity' (количество валюты у пользователя),
-        'purchase_amount' (общая сумма, за которую была куплена валюта),
-        'selling_amount' (сумма, за которую сейчас можно продать всю имеющуюся валюту)
-        'profitability' (доходность в десятичном виде)
+        Получение данных о портфеле пользователя по id
 
-        например количество долларов у пользователя можно получить как d['dollar']['quantity']
+        Parameters
+        ----------
+        user_id: int
+
+        Returns
+        -------
+        dict
+            словарь вида {название валюты: словарь}
+
+            внутренний словарь имеет поля:
+            'quantity' (количество валюты у пользователя),
+            'purchase_amount' (общая сумма, за которую была куплена валюта),
+            'selling_amount' (сумма, за которую сейчас можно продать всю имеющуюся валюту)
+            'profitability' (доходность в десятичном виде)
+
+            например количество долларов у пользователя можно получить как d['dollar']['quantity']
         """
+        
         all_operations = self.conn.execute(select(self.operations).where(
             self.operations.c.user_ID == user_id
         ))
@@ -180,7 +317,7 @@ class Database:
             if row[5] == 'BUY':
                 d[currency_name]['quantity'] += row[4]
                 d[currency_name]['purchase_amount'] += row[4] * row[3]
-            else:
+            elif row[5] == 'SELL':
                 d[currency_name]['quantity'] -= row[4]
                 d[currency_name]['purchase_amount'] -= row[4] * row[3]
 
