@@ -114,9 +114,30 @@ class CurrencyInfo:
             except Exception as e:
                 return f"In function get_info_about_currency_by_figi \n {e}"
 
+    def get_current_price_by_figi(self, figi: str):
+        with Client(token) as client:
+            # try:
+                instrument = client.instruments.currency_by(id=figi,
+                                                    id_type=InstrumentIdType.INSTRUMENT_ID_TYPE_FIGI).instrument
+                return instrument.nominal.units + instrument.nominal.nano / 1e9
+
+            # except Exception as e:
+            #     return f"In function get_current_price_by_figi"
+
+    def get_current_price_by_ticker(self, ticker: str):
+        with Client(token) as client:
+            try:
+                figi = self.get_figi_by_ticker(ticker)
+                instrument = client.instruments.currency_by(id=figi,
+                                                    id_type=InstrumentIdType.INSTRUMENT_ID_TYPE_FIGI).instrument
+                return instrument.nominal.units + instrument.nominal.nano / 1e9
+
+            except Exception as e:
+                return f"In function get_current_price_by_figi"
+
+
     def get_history_of_current_currency_by_ticker(self, ticker: str, start_time: datetime, end_time: datetime,
-                                                  interval: CandleInterval = CandleInterval.CANDLE_INTERVAL_HOUR) -> \
-    List[dict]:
+                                                  interval: CandleInterval = CandleInterval.CANDLE_INTERVAL_HOUR) -> List[dict]:
         """
         Получение истории цен текущей валюты по ее тикеру.
 
@@ -211,5 +232,5 @@ class CurrencyInfo:
 
 if __name__ == '__main__':
     currency_info = CurrencyInfo(token)
-    print(currency_info.get_history_of_current_currency_by_figi('USD000UTSTOM', datetime.utcnow() - timedelta(days=7),
-                                                                datetime.utcnow()))
+    price = currency_info.get_current_price_by_ticker('CNYRUB_TMS')
+    print(price)
