@@ -115,6 +115,13 @@ class CurrencyInfo:
                 return f"In function get_info_about_currency_by_figi \n {e}"
 
     def get_current_price_by_figi(self, figi: str):
+        """
+        Получение текущей цены валюты по FIGI.
+
+        :param figi: FIGI инструмента.
+        :type figi: str
+        :return: Текущая цена валюты в рублях.
+        """
         with Client(token) as client:
             # try:
                 instrument = client.instruments.currency_by(id=figi,
@@ -125,6 +132,13 @@ class CurrencyInfo:
             #     return f"In function get_current_price_by_figi"
 
     def get_current_price_by_ticker(self, ticker: str):
+        """
+        Получение текущей цены валюты по тикеру.
+
+        :param ticker: Тикер инструмента.
+        :type ticker: str
+        :return: Текущая цена валюты в рублях.
+        """
         with Client(token) as client:
             try:
                 figi = self.get_figi_by_ticker(ticker)
