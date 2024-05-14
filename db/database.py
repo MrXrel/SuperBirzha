@@ -35,12 +35,14 @@ class Database:
         self.tg_bot = Table('Notifier_bot', self.metadata,
                             Column('ID', ForeignKey('Users.ID'), primary_key=True),
                             Column('tg_id', Integer(), default=0),
-                            Column('old_briefcase', Float(), nullable=False),
-                            Column('new_briefcase', Float(), nullable=False),
-                            Column('delta_to_note', Float(), nullable=False),
+                            Column('old_briefcase', Float(), default=0),
+                            Column('new_briefcase', Float(), default=0),
+                            Column('delta_to_note', Float(), default=100),
                             Column('time_to_note', Time(), default=time(hour=10, minute=0)),
                             Column('already_notified', Boolean(), default=False),
                             )
+        self.tg_bot_keys = ('ID', 'tg_id', 'old_briefcase', 'new_briefcase',
+                            'delta_to_note', 'time_to_note', 'already_notified')
         self.briefcase = Table('Briefcase', self.metadata,
                                Column('ID', Integer(), primary_key=True),
                                Column('user_id', ForeignKey('Users.ID')),
@@ -83,6 +85,9 @@ class Database:
                     user_id=r.inserted_primary_key[0],
                     currency_id=i
                 ))
+            self.conn.execute(insert(self.tg_bot).values(
+                ID=r.inserted_primary_key[0]
+            ))
             return r.inserted_primary_key[0]
         except Exception:
             return 0
@@ -457,3 +462,67 @@ class Database:
                                                abs(d[currency]['purchase_amount'])
 
         return d
+
+    # функции для tg бота
+
+    def get_all_user_for_tg_bot(self):
+        """
+        Получение данных для всех пользователей
+
+        Returns
+        -------
+        dict
+            ключ user_id
+            поля 'ID', 'price'
+        """
+        s = select(self.tg_bot)
+        rs = self.conn.execute(s)
+        users = dict()
+        for row in rs:
+            users[row[0]] = {key: value for key, value in zip(self.tg_bot_keys, row)}
+        return users
+
+    def update_tg_id(self, user_id: int, new_tg_id: int):
+        """
+        Обновление tg id
+
+        Parameters
+        ----------
+        user_id: int
+        new_tg_id: int
+        """
+        self.conn.execute(update(self.tg_bot).where(
+            self.tg_bot.c.ID == user_id
+        ).values(
+            tg_id=new_tg_id
+        ))
+
+    def update_time_to_note(self, user_id: int, new_time: time):
+        """
+        Обновление времени оповещения
+
+        Parameters
+        ----------
+        user_id: int
+        new_time: time
+        """
+        self.conn.execute(update(self.tg_bot).where(
+            self.tg_bot.c.ID == user_id
+        ).values(
+            time_to_note=new_time
+        ))
+
+    def update_delta_to_note(self, user_id: int, new_delta: float):
+        """
+        Обновление величины изменения для оповещения
+
+        Parameters
+        ----------
+        user_id: int
+        new_delta: float
+        """
+        self.conn.execute(update(self.tg_bot).where(
+            self.tg_bot.c.ID == user_id
+        ).values(
+            time_to_note=new_delta
+        ))
