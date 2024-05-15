@@ -47,10 +47,11 @@ class Database:
                                Column('ID', Integer(), primary_key=True),
                                Column('user_id', ForeignKey('Users.ID')),
                                Column('currency_id', ForeignKey('Currency.ID')),
-                               Column('amount', Float(), default=0),
+                               Column('quantity', Float(), default=0),
                                )
         self.list_of_currencies = ['dollar', 'euro', 'yuan', 'gold']
         self.metadata.create_all(self.engine)
+        self.lastID = len(self.conn.execute(select(self.users)).fetchall())
         for i in self.list_of_currencies:
             self.add_currency(0, i)
 
@@ -88,6 +89,7 @@ class Database:
             self.conn.execute(insert(self.tg_bot).values(
                 ID=r.inserted_primary_key[0]
             ))
+            self.lastID = r.inserted_primary_key[0]
             return r.inserted_primary_key[0]
         except Exception:
             return 0
@@ -246,16 +248,6 @@ class Database:
             self.currency.c.ID == currency_id
         )).fetchall()[0][0]
 
-        old_balance = self.conn.execute(select(self.users.c.balance).where(
-            self.users.c.ID == user_id
-        )).fetchall()[0][0]
-
-        old_amount = self.conn.execute(select(
-            self.briefcase.c.amount).where(
-            self.briefcase.c.user_id == user_id,
-            self.briefcase.c.currency_id == currency_id
-        )).fetchall()[0][0]
-
         # вставка записи в Operations
         ins = insert(self.operations).values(
             user_ID=user_id,
@@ -265,8 +257,14 @@ class Database:
             type_of_operation=type_of_operation,
             time=time_of_operation
         )
+
         r = self.conn.execute(ins)
+
         # изменение баланса в Users
+        old_balance = self.conn.execute(select(self.users.c.balance).where(
+            self.users.c.ID == user_id
+        )).fetchall()[0][0]
+
         k = 0
         if type_of_operation == 'SELL':
             k = 1
@@ -279,11 +277,29 @@ class Database:
         ))
 
         # изменение количества в Briefcase
+        old_quantity = self.conn.execute(select(
+            self.briefcase.c.quantity).where(
+            self.briefcase.c.user_id == user_id,
+            self.briefcase.c.currency_id == currency_id
+        )).fetchall()[0][0]
+
         self.conn.execute(update(self.briefcase).where(
             self.briefcase.c.user_id == user_id,
             self.briefcase.c.currency_id == currency_id
         ).values(
-            amount=old_amount + quantity * k * -1
+            quantity=old_quantity + quantity * k * -1
+        ))
+
+        # изменение портфеля в Notifier_bot
+        old_new_briefcase = self.conn.execute(select(
+            self.tg_bot.c.new_briefcase).where(
+            self.tg_bot.c.ID == user_id
+        )).fetchall()[0][0]
+
+        self.conn.execute(update(self.tg_bot).where(
+            self.tg_bot.c.ID == user_id
+        ).values(
+            new_briefcase=old_new_briefcase + quantity * k * -1 * price
         ))
         return r.inserted_primary_key  # id операции
 
@@ -335,7 +351,7 @@ class Database:
 
     def update_currency(self, new_values: dict):
         """
-        Обновляет цены всех валют
+        Обновляет цены всех валют, и пересчитывает все портфели для tg бота
 
         Parameters
         ----------
@@ -348,6 +364,19 @@ class Database:
                 self.currency.c.currency_name == currency_name
             ).values(
                 price=price
+            ))
+
+        all_briefcases = self.conn.execute(select(self.briefcase))
+        new_new_briefcases = {key: 0 for key in range(0, self.lastID)}
+        for row in all_briefcases:
+            if self.list_of_currencies[row[2] - 1] in new_values.keys():
+                new_new_briefcases[row[1] - 1] += new_values[self.list_of_currencies[row[2] - 1]] * row[3]
+
+        for user_id, new_new_briefcase in new_new_briefcases.items():
+            self.conn.execute(update(self.tg_bot).where(
+                self.tg_bot.c.ID == user_id + 1
+            ).values(
+                new_briefcase=new_new_briefcase
             ))
 
     def get_history_by_id(self, user_id: int, number_of_rows: int = -1, reverse: bool = False,
@@ -423,7 +452,7 @@ class Database:
             внутренний словарь имеет поля:
             'quantity' (количество валюты у пользователя),
             'purchase_amount' (общая сумма, за которую была куплена валюта),
-            'selling_amount' (сумма, за которую сейчас можно продать всю имеющуюся валюту)
+            'selling_amount' (сумма, за которую сейчас можно продать всю имеющуюся валюту, + уже проданная)
             'profitability' (доходность в десятичном виде)
 
             например количество долларов у пользователя можно получить как d['dollar']['quantity']
@@ -434,7 +463,7 @@ class Database:
         ))
         d = {self.list_of_currencies[key]: {
             'quantity': self.conn.execute(select(
-                self.briefcase.c.amount).where(
+                self.briefcase.c.quantity).where(
                 self.briefcase.c.user_id == user_id,
                 self.briefcase.c.currency_id == key + 1
             )).fetchall()[0][0],
@@ -526,3 +555,5 @@ class Database:
         ).values(
             time_to_note=new_delta
         ))
+
+
