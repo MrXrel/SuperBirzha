@@ -31,3 +31,11 @@ class UserLogin(UserMixin):
 
     def get_balance(self):
         return self.__user["balance"]
+
+
+class Currency:
+    def __init__(self, id, ru_name, buy_price, sell_price):
+        self.id = id
+        self.ru_name = ru_name
+        self.buy_price = buy_price
+        self.sell_price = sell_price
