@@ -276,12 +276,3 @@ class CurrencyInfo:
         """
 
         return current_candle.units + current_candle.nano / 1e9  # nano - 9 zeroes
-
-
-if __name__ == "__main__":
-    currency_info = CurrencyInfo(token)
-    print(
-        currency_info.get_history_of_current_currency_by_ticker(
-            "USD000000TOD", datetime.utcnow() - timedelta(hours=4), datetime.utcnow()
-        )[0]["low"]
-    )

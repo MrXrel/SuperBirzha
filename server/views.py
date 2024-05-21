@@ -6,6 +6,7 @@ from .forms.Login import LoginForm
 from flask_login import login_user, current_user, login_required, logout_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime, timedelta
+import json
 
 
 @login_manager.user_loader
@@ -15,7 +16,23 @@ def load_user(user_id):
 
 @app.get("/currency/<currency_id>")
 def get_currency(currency_id):
-    return Response(status=200)
+    low_price = parser_API.get_history_of_current_currency_by_ticker(
+        CURRENCIES[currency_id][0],
+        datetime.utcnow() - timedelta(hours=5),
+        datetime.utcnow(),
+    )[0]["low"]
+    high_price = parser_API.get_history_of_current_currency_by_ticker(
+        CURRENCIES[currency_id][0],
+        datetime.utcnow() - timedelta(hours=5),
+        datetime.utcnow(),
+    )[0]["high"]
+    data = models.Currency(
+        currency_id, CURRENCIES[currency_id][1], high_price, low_price
+    )
+    with open("server/templates/about_currencies.json", "r") as js:
+        json_dump = json.load(js)
+        about = json_dump[currency_id]
+    return render_template("pettern_currencies.html", curr=data, about=about)
 
 
 # Страница со всеми валютами
@@ -36,6 +53,7 @@ def get_currencies():
         data.append(
             models.Currency(currency, CURRENCIES[currency][1], high_price, low_price)
         )
+
     return render_template("currencies.html", curruncies=data)
 
 
