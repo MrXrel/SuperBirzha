@@ -1,0 +1,17 @@
+{% extends 'layout.html' %}
+
+{% block title %}Вход{% endblock %}
+
+{% block sign %}
+    <div class="container">
+        <h2>Вход</h2>
+        <form action="" method="post">
+            {{ form.hidden_tag() }}
+            <p>{{ form.email() }}
+            <p>{{ form.password() }}
+            <p>{{ form.submit() }}
+            <center><a1><em>Если нет аккаунта, то регистрация ниже)</em></a1></center>
+            <center><a href="{{ url_for('user_registration') }}"><em>Регистрация</em></a></center>
+        </form>
+    </div>
+{% endblock %}
