@@ -12,6 +12,8 @@ from datetime import datetime, timedelta
 # ЮАНЬ       CNYRUB_TMS    TCS3013HRTL0
 # ЕВРО       EUR_RUB__TOM  BBG0013HJJ31
 
+all_figi = {'gold': 'BBG000VJ5YR4', 'dollar': 'TCS0013HGFT4', 'yuan': 'TCS3013HRTL0', 'euro': 'BBG0013HJJ31'}
+
 class CurrencyInfo:
     '''
     Класс для работы с информацией о валютах через API Tinkoff Invest.
@@ -114,7 +116,7 @@ class CurrencyInfo:
             except Exception as e:
                 return f"In function get_info_about_currency_by_figi \n {e}"
 
-    def get_current_price_by_figi(self, figi: str):
+    def get_current_price_by_figi(self, figi: str) -> float:
         """
         Получение текущей цены валюты по FIGI.
 
@@ -123,13 +125,24 @@ class CurrencyInfo:
         :return: Текущая цена валюты в рублях.
         """
         with Client(token) as client:
-            # try:
+            try:
                 instrument = client.instruments.currency_by(id=figi,
                                                     id_type=InstrumentIdType.INSTRUMENT_ID_TYPE_FIGI).instrument
                 return instrument.nominal.units + instrument.nominal.nano / 1e9
 
-            # except Exception as e:
-            #     return f"In function get_current_price_by_figi"
+            except Exception as e:
+                return f"In function get_current_price_by_figi"
+
+    def get_all_prices(self) -> Optional[dict]:
+        data = {}
+        with Client(token) as client:
+            try:
+                for elem in all_figi.items():
+                    data[elem[0]] = self.get_current_price_by_figi(elem[1])
+                return data
+            except Exception as e:
+                return f"In get_all_prices"
+
 
     def get_current_price_by_ticker(self, ticker: str):
         """
@@ -246,5 +259,4 @@ class CurrencyInfo:
 
 if __name__ == '__main__':
     currency_info = CurrencyInfo(token)
-    price = currency_info.get_current_price_by_ticker('CNYRUB_TMS')
-    print(price)
+    print(currency_info.get_all_prices())
