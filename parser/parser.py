@@ -8,7 +8,6 @@ from tinkoff.invest import (
 )
 from pandas import DataFrame
 import pandas as pd
-from config import token
 from datetime import datetime, timedelta
 import requests
 
