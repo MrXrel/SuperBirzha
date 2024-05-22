@@ -1,0 +1,13 @@
+{% extends 'layout.html' %}
+
+{% block title %}Пополнение счёта{% endblock %}
+
+{% block sign %}
+    <div class="container">
+        <h2>Пополнение счёта по</h2><h2>..</h2>
+        <form action="/login" method="post">
+            <input type="text" name="username" placeholder="Введите сумму пополнения" required>
+            <input type="submit" value="Подтвердить">
+        </form>
+    </div>
+{% endblock %}
