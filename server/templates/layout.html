@@ -10,8 +10,6 @@
 	
     <title>{% block title %}{% endblock %}</title>
     <link type="text/css" href="{{ url_for('static', filename='css/index.css') }}" rel="stylesheet" />
-
-    <link rel="icon" href="/static/img/logo.png">
 </head>
 <body>
     <div class="navbaru">
@@ -21,11 +19,12 @@
                 <i class="fa fa-caret-down"></i>
             </button>
             <div class="dropdown-contentSS">
-                <a href="#pay_menu">Зарегистрироваться</a>
-                <a href="#hustory">Войти</a>
+                <a href="#hustory">История</a>
+                <a href="#pay_menu">Пополнить</a>
+                <a href="#logout">Выйти</a>
             </div>
-        <a href="#">Валюта</a>
-        <a href="#about">О нас</a>
+        <a href="{{ url_for('get_currencies') }}">Валюта</a>
+        <a href="{{ url_for('get_about_us') }}">О нас</a>
         </div> 
     </div>
     {% block sign %}
