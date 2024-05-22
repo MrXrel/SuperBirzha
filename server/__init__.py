@@ -20,6 +20,7 @@ app.config.from_object(__name__)
 app.config.update(dict(DATABASE=os.path.join(app.root_path, "superbirzha.db")))
 
 login_manager = LoginManager(app)
+login_manager.login_message = ""
 login_manager.login_view = "get_user_authorization"
 
 

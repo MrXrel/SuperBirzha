@@ -1,5 +1,13 @@
 from server import app, dbase, CURRENCIES, parser_API
-from flask import render_template, request, redirect, url_for, Response
+from flask import (
+    render_template,
+    request,
+    redirect,
+    url_for,
+    Response,
+    flash,
+    get_flashed_messages,
+)
 from server import models, login_manager
 from .forms.Registration import RegistrationForm
 from .forms.Login import LoginForm
@@ -18,12 +26,12 @@ def load_user(user_id):
 def get_currency(currency_id):
     low_price = parser_API.get_history_of_current_currency_by_ticker(
         CURRENCIES[currency_id][0],
-        datetime.utcnow() - timedelta(hours=5),
+        datetime.utcnow() - timedelta(hours=1),
         datetime.utcnow(),
     )[0]["low"]
     high_price = parser_API.get_history_of_current_currency_by_ticker(
         CURRENCIES[currency_id][0],
-        datetime.utcnow() - timedelta(hours=5),
+        datetime.utcnow() - timedelta(hours=1),
         datetime.utcnow(),
     )[0]["high"]
     data = models.Currency(
@@ -77,7 +85,12 @@ def user_registration():
     if form.validate_on_submit():
         hash = generate_password_hash(form.password.data)
         if check_password_hash(hash, form.password_confirm.data):
-            dbase.create_user(form.email.data, hash, form.surname.data, form.name.data)
+            data = dbase.create_user(
+                form.email.data, hash, form.surname.data, form.name.data
+            )
+            if data == 0:
+                flash("Пользователь с такой почтой уже существует.")
+                return redirect(url_for("user_registration"))
             return redirect(url_for("get_user_authorization"), 301)
     return render_template("sign_up.html", form=form)
 
@@ -99,7 +112,9 @@ def post_user_authorization():
         userlogin = models.UserLogin().create(user)
         login_user(userlogin)
         return redirect(url_for("get_private_office"))
-    return Response("пароль кек")
+    else:
+        flash("Неверный пароль или логин")
+        return redirect(url_for("get_user_authorization"))
 
 
 # Выход из профиля

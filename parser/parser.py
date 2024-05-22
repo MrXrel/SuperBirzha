@@ -276,3 +276,10 @@ class CurrencyInfo:
         """
 
         return current_candle.units + current_candle.nano / 1e9  # nano - 9 zeroes
+
+
+if __name__ == "__main__":
+    curr = CurrencyInfo(
+        "t.IEa99GPRoD0m0Z3MH_M2BUMIAVsqYMCpcmJhQFIKDw8rg3tk7CpENgicqyVpOMSTK1ubCt1ZB7SQCXTcEy0Dcw"
+    )
+    print(curr.get_current_price_by_figi("TCS0013HGFT4"))
