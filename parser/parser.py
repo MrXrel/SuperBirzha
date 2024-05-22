@@ -2,7 +2,7 @@ from typing import List, Optional, Dict
 from tinkoff.invest import InstrumentIdType, InstrumentStatus, CandleInterval, Client, HistoricCandle
 from pandas import DataFrame
 import pandas as pd
-from config import token
+import config
 from datetime import datetime, timedelta
 import requests
 
@@ -13,12 +13,11 @@ import requests
 # ЕВРО       EUR_RUB__TOM  BBG0013HJJ31
 
 all_figi = {
-    ('gold', 'GlD'): 'BBG000VJ5YR4',
+    ('gold', 'XAU'): 'BBG000VJ5YR4',
     ('dollar', 'USD'): 'TCS0013HGFT4',
     ('yuan', 'CNY'): 'TCS3013HRTL0',
     ('euro', 'EUR'): 'BBG0013HJJ31'
 }
-
 
 class CurrencyInfo:
     '''
@@ -34,9 +33,11 @@ class CurrencyInfo:
 
         :param token: Токен для аутентификации на API Tinkoff Invest.
         """
-        self.token = token
+        self.token = config.token
+        self.api_metal_key = config.metal_key
+        self.api_exchange_rate_key = config.exchange_rate_key
 
-    def get_exchange_rate(self, base_currency: str, target_currency: str) -> float:
+    def get_exchange_rate_of_currency(self, base_currency: str, target_currency: str) -> float:
         """
         :param base_currency: валюта, для которой требуется получить курс обмена.
         :type base_currency: str
@@ -45,18 +46,35 @@ class CurrencyInfo:
         :return: Курс обмена между двумя валютами
         :rtype: float
         """
-        url = f"https://api.exchangerate-api.com/v4/latest/{base_currency}"
+        url = f"https://v6.exchangerate-api.com/v6/{self.api_exchange_rate_key}/latest/{base_currency}"
+        response = requests.get(url)
+        data = response.json()
+        rate = data['conversion_rates'].get(target_currency)
+        return rate
+
+    def get_exchange_rate_of_metal(self) -> float:
+        """
+        Получает курс золота к рублю с помощью Metals API.
+
+        :return: Курс золота к рублю.
+        :rtype: float
+        """
+        base_currency = 'XAU'
+        target_currency = "RUB"
+        url = f"https://api.metalpriceapi.com/v1/latest?api_key={self.api_metal_key}&base={base_currency}&currencies={target_currency}"
         response = requests.get(url)
         data = response.json()
 
-        if 'rates' in data:
-            rate = data['rates'].get(target_currency)
-            if rate is not None:
-                return rate
-            else:
-                raise ValueError(f"Курс обмена для валюты '{target_currency}' не найден.")
-        else:
-            raise KeyError("Ответ API не содержит ключ 'rates'.")
+        rates = data["rates"]['RUB']
+
+        return rates
+
+    def is_metal(self, figi: str) -> bool:
+        """
+        Проверяет, является ли валюта\металл металлом.
+        :rtype: bool
+        """
+        return figi == 'BBG000VJ5YR4'
 
     def create_data_frame(self, instrument: List[dict]) -> DataFrame:
         """
@@ -180,11 +198,14 @@ class CurrencyInfo:
         :type figi: str
         :return: Текущая цена валюты в рублях.
         """
-        with Client(token) as client:
+        with Client(self.token) as client:
             instrument = client.instruments.currency_by(id=figi,
                                                         id_type=InstrumentIdType.INSTRUMENT_ID_TYPE_FIGI).instrument
             ticker = self.get_ticker_by_figi(figi)
-            rate = self.get_exchange_rate(ticker, 'RUB')
+            if not (self.is_metal(figi)):
+                rate = self.get_exchange_rate_of_currency(ticker, 'RUB')
+            else:
+                rate = self.get_exchange_rate_of_metal()
             price_based_currency = instrument.nominal.units + instrument.nominal.nano / 1e9
             price_in_rubles = price_based_currency * rate
             return price_in_rubles
@@ -197,12 +218,12 @@ class CurrencyInfo:
         :type ticker: str
         :return: Текущая цена валюты в рублях.
         """
-        with Client(token) as client:
+        with Client(self.token) as client:
             figi = self.get_figi_by_ticker(ticker)
             instrument = client.instruments.currency_by(id=figi,
                                                         id_type=InstrumentIdType.INSTRUMENT_ID_TYPE_FIGI).instrument
             ticker = self.get_ticker_by_figi(figi)
-            rate = self.get_exchange_rate(ticker, 'RUB')
+            rate = self.get_exchange_rate_of_currency(ticker, 'RUB')
             price_based_currency = instrument.nominal.units + instrument.nominal.nano / 1e9
             price_in_rubles = price_based_currency * rate
             return price_in_rubles
@@ -217,7 +238,6 @@ class CurrencyInfo:
         data_of_prices = {}
         with Client(self.token) as client:
             for key, value in all_figi.items():
-                print(f"{key} {value}\n")
                 data_of_prices[key[0]] = self.get_current_price_by_figi(value)
         return data_of_prices
 
@@ -318,9 +338,9 @@ class CurrencyInfo:
 
 
 if __name__ == '__main__':
-    currency_info = CurrencyInfo(token)
+    currency_info = CurrencyInfo(config.token)
     # print(currency_info.get_all_currencies())
     # print(currency_info.get_all_shares())
     # print(currency_info.get_current_price_by_figi('TCS3013HRTL0'))
     print(currency_info.get_all_prices())
-    print(currency_info.get_all_prices())
+
