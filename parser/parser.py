@@ -18,6 +18,8 @@ all_figi = {
     ('yuan', 'CNY'): 'TCS3013HRTL0',
     ('euro', 'EUR'): 'BBG0013HJJ31'
 }
+
+
 class CurrencyInfo:
     '''
     Класс для работы с информацией о валютах через API Tinkoff Invest.
@@ -99,6 +101,7 @@ class CurrencyInfo:
                 return self.create_data_frame(all_currencies)
             except Exception as e:
                 return f"In function get_all_currencies \n {e}"
+
     def get_figi_by_ticker(self, ticker: str) -> Optional[str]:
         """
         Получение FIGI валюты по ее тикеру.
@@ -178,16 +181,13 @@ class CurrencyInfo:
         :return: Текущая цена валюты в рублях.
         """
         with Client(token) as client:
-                instrument = client.instruments.currency_by(id=figi,
-                                                                 id_type=InstrumentIdType.INSTRUMENT_ID_TYPE_FIGI).instrument
-                ticker = self.get_ticker_by_figi(figi)
-                rate = self.get_exchange_rate(ticker, 'RUB')
-                price_based_currency = instrument.nominal.units + instrument.nominal.nano / 1e9
-                price_in_rubles = price_based_currency * rate
-                return price_in_rubles
-
-
-
+            instrument = client.instruments.currency_by(id=figi,
+                                                        id_type=InstrumentIdType.INSTRUMENT_ID_TYPE_FIGI).instrument
+            ticker = self.get_ticker_by_figi(figi)
+            rate = self.get_exchange_rate(ticker, 'RUB')
+            price_based_currency = instrument.nominal.units + instrument.nominal.nano / 1e9
+            price_in_rubles = price_based_currency * rate
+            return price_in_rubles
 
     def get_current_price_by_ticker(self, ticker: str):
         """
@@ -198,14 +198,14 @@ class CurrencyInfo:
         :return: Текущая цена валюты в рублях.
         """
         with Client(token) as client:
-                figi = self.get_figi_by_ticker(ticker)
-                instrument = client.instruments.currency_by(id=figi,
-                                                            id_type=InstrumentIdType.INSTRUMENT_ID_TYPE_FIGI).instrument
-                ticker = self.get_ticker_by_figi(figi)
-                rate = self.get_exchange_rate(ticker, 'RUB')
-                price_based_currency = instrument.nominal.units + instrument.nominal.nano / 1e9
-                price_in_rubles = price_based_currency * rate
-                return price_in_rubles
+            figi = self.get_figi_by_ticker(ticker)
+            instrument = client.instruments.currency_by(id=figi,
+                                                        id_type=InstrumentIdType.INSTRUMENT_ID_TYPE_FIGI).instrument
+            ticker = self.get_ticker_by_figi(figi)
+            rate = self.get_exchange_rate(ticker, 'RUB')
+            price_based_currency = instrument.nominal.units + instrument.nominal.nano / 1e9
+            price_in_rubles = price_based_currency * rate
+            return price_in_rubles
 
     def get_all_prices(self) -> Dict[str, float]:
         """
@@ -222,7 +222,8 @@ class CurrencyInfo:
         return data_of_prices
 
     def get_history_of_current_currency_by_ticker(self, ticker: str, start_time: datetime, end_time: datetime,
-                                                  interval: CandleInterval = CandleInterval.CANDLE_INTERVAL_HOUR) -> List[dict]:
+                                                  interval: CandleInterval = CandleInterval.CANDLE_INTERVAL_HOUR) -> \
+            List[dict]:
         """
         Получение истории цен текущей валюты по ее тикеру.
 
@@ -253,7 +254,8 @@ class CurrencyInfo:
                 return f"In function get_history_of_current_currency_by_ticker \n {e}"
 
     def get_history_of_current_currency_by_figi(self, figi: str, start_time: datetime, end_time: datetime,
-                                             interval: CandleInterval = CandleInterval.CANDLE_INTERVAL_HOUR) -> List[dict]:
+                                                interval: CandleInterval = CandleInterval.CANDLE_INTERVAL_HOUR) -> List[
+        dict]:
         """
         Получение истории цен текущей акции по ее FIGI.
 
@@ -320,4 +322,5 @@ if __name__ == '__main__':
     # print(currency_info.get_all_currencies())
     # print(currency_info.get_all_shares())
     # print(currency_info.get_current_price_by_figi('TCS3013HRTL0'))
+    print(currency_info.get_all_prices())
     print(currency_info.get_all_prices())

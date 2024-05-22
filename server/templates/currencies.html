@@ -1,0 +1,30 @@
+{% extends 'layout.html' %}
+
+{% block title %}Валюта{% endblock %}
+
+{% block sign %}
+    <center>
+        <div id="currectangle">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th scope="col">Название</th>
+                        <th scope="col">Покупка</th>
+                        <th scope="col">Покупка изменение</th>
+                        <th scope="col">Продажа</th>
+                        <th scope="col">Продажа изменение</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <th scope="row"><div id="front">Валюта</div><a href="#" class="color-change-link">USD</a></th>
+                        <td><span>0</span> ₽</td>
+                        <td><span>0</span> %</td>
+                        <td><span>0</span> ₽</td>
+                        <td><span>0</span> %</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </center>
+{% endblock %}
