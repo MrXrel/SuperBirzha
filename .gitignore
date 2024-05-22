@@ -170,3 +170,5 @@ cython_debug/
 
 # End of https://www.toptal.com/developers/gitignore/api/flask
 superbirzha.db
+.DS_Store
+/.DS_Store

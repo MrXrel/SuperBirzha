@@ -6,7 +6,7 @@
     <div class="container">
         <h2>Вход</h2>
         {% for msg in get_flashed_messages() %}
-		{{msg}}
+		    {{msg}}
 		{% endfor %}
         <form action="" method="post">
             {{ form.hidden_tag() }}
