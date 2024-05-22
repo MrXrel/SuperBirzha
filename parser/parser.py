@@ -2,7 +2,6 @@ from typing import List, Optional, Dict
 from tinkoff.invest import InstrumentIdType, InstrumentStatus, CandleInterval, Client, HistoricCandle
 from pandas import DataFrame
 import pandas as pd
-from config import token
 from datetime import datetime, timedelta
 import requests
 
