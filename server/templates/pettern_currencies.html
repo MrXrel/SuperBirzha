@@ -6,10 +6,10 @@
     <center>
         <div id="persacc">
             <center>
-                <div id="currencies"><h2><b>Валюта</b></h2></div>
-                <div id="code"><h5>Код валюты</h5></div>
+                <div id="currencies"><h2><b>{{curr.ru_name}}</b></h2></div>
+                <div id="code"><h5>{{curr.id}}</h5></div>
             </center>
-            <div><h3>Цена ₽</h3></div>
+            <div><h3>{{curr.buy_price}} ₽</h3></div>
             <div class="buysell_position">
                 <button class="button_to_buy">
                     <h5 style="color: white;">Купить</h5>
@@ -23,7 +23,7 @@
         <div id="aboutcurrencies">
             <div><h2><b>О Валюте</b></h2>
                 <div>
-                    <p>информация о ней</p> <!-- при добавлении информации О валюте будет
+                    <p>{{about}}</p> <!-- при добавлении информации О валюте будет
                         в центре (как и задумывалось)-->
                 </div>
             </div>
