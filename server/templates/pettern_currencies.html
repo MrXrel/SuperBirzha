@@ -11,16 +11,16 @@
             </center>
             <div><h3>{{curr.buy_price}} ₽</h3></div>
             <div class="buysell_position">
-                <form method="post" action="">
-                    <button class="button_to_buy">
-                        <h5 style="color: white;">{{ form.submit_buy() }}</h5>
-                    </button>
-                    <button class="button_to_sell">
-                        <h5 style="color: white;">{{ form.submit_sell() }}</h5>
-                    </button>
-                </form>
+            <form method="post">
+                <button class="button_to_buy" name="submit_buy">
+                    <h5 style="color: white;">Купить</h5>
+                </button>
+                <button class="button_to_sell" name="submit_sell">
+                    <h5 style="color: white;">Продать</h5>
+                </button>
+            </form>
             </div>
-        </div></form>
+        </div>
         <div class="contain"><p>Тут вставить график</p></div>
         <div id="aboutcurrencies">
             <div><h2><b>О Валюте</b></h2>

@@ -60,9 +60,21 @@ def post_buy_currency(currency_id):
         data[cuur] = price
     dbase.update_currency(data)
     if "submit_buy" in request.form:
-        dbase.add_operation(current_user.get_id(), 1, "BUY", 1, datetime.utcnow())
+        dbase.add_operation(
+            current_user.get_id(),
+            CURRENCIES[currency_id][2],
+            "BUY",
+            1,
+            datetime.utcnow(),
+        )
     else:
-        dbase.add_operation(current_user.get_id(), 1, "SELL", 1, datetime.utcnow())
+        dbase.add_operation(
+            current_user.get_id(),
+            CURRENCIES[currency_id][2],
+            "SELL",
+            1,
+            datetime.utcnow(),
+        )
     return redirect(url_for("get_currency", currency_id=currency_id))
 
 
