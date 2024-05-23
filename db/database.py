@@ -34,14 +34,14 @@ class Database:
         self.currency_keys = ('ID', 'currency_name', 'price')
         self.tg_bot = Table('Notifier_bot', self.metadata,
                             Column('ID', ForeignKey('Users.ID'), primary_key=True),
+                            Column('name', String(200), nullable=False),
                             Column('tg_id', Integer(), default=0),
                             Column('old_briefcase', Float(), default=0),
                             Column('new_briefcase', Float(), default=0),
                             Column('delta_to_note', Float(), default=100),
                             Column('time_to_note', Time(), default=time(hour=10, minute=0)),
-                            Column('already_notified', Boolean(), default=False),
                             )
-        self.tg_bot_keys = ('ID', 'tg_id', 'old_briefcase', 'new_briefcase',
+        self.tg_bot_keys = ('ID', 'name', 'tg_id', 'old_briefcase', 'new_briefcase',
                             'delta_to_note', 'time_to_note', 'already_notified')
         self.briefcase = Table('Briefcase', self.metadata,
                                Column('ID', Integer(), primary_key=True),
@@ -87,7 +87,8 @@ class Database:
                     currency_id=i
                 ))
             self.conn.execute(insert(self.tg_bot).values(
-                ID=r.inserted_primary_key[0]
+                ID=r.inserted_primary_key[0],
+                name=name
             ))
             self.lastID = r.inserted_primary_key[0]
             return r.inserted_primary_key[0]
@@ -242,6 +243,7 @@ class Database:
         -------
         int
             id выполненной операции
+            0, если недостаточно средств
         """
 
         price = self.conn.execute(select(self.currency.c.price).where(
@@ -269,6 +271,8 @@ class Database:
         if type_of_operation == 'SELL':
             k = 1
         elif type_of_operation == 'BUY':
+            if old_balance < price * quantity:
+                return 0  # недостаточно средств
             k = -1
         self.conn.execute(update(self.users).where(
             self.users.c.ID == user_id
@@ -321,6 +325,7 @@ class Database:
         -------
         int
             id выполненной операции
+            0, если недостаточно средств
         """
         old_balance = self.conn.execute(select(self.users.c.balance).where(
             self.users.c.ID == user_id
@@ -341,6 +346,8 @@ class Database:
         if type_of_operation == 'DEPOSIT':
             k = 1
         elif type_of_operation == 'WITHDRAW':
+            if old_balance < quantity:
+                return 0  # недостаточно средств
             k = -1
         self.conn.execute(update(self.users).where(
             self.users.c.ID == user_id
@@ -553,7 +560,22 @@ class Database:
         self.conn.execute(update(self.tg_bot).where(
             self.tg_bot.c.ID == user_id
         ).values(
-            time_to_note=new_delta
+            delta_to_note=new_delta
         ))
 
+    def update_old_briefcase_by_id(self, user_id: int):
+        """
+        Приравнивает old_briefcase к new_briefcase
 
+        Parameters
+        ----------
+        user_id: int
+        """
+        new_old_briefcase = self.conn.execute(select(self.tg_bot.c.new_briefcase).where(
+            self.tg_bot.c.ID == user_id
+        )).fetchall()[0][0]
+        self.conn.execute(update(self.tg_bot).where(
+            self.tg_bot.c.ID == user_id
+        ).values(
+            old_briefcase=new_old_briefcase
+        ))
