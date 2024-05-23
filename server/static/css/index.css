@@ -24,7 +24,7 @@ header {
     place-items: center;
 }
 
-.container {
+.container-reg-aut {
     width: 400px;
     margin: 150px auto;
     padding: 20px;
@@ -195,7 +195,7 @@ footer {
 }
 
 .container {
-    width: 400px;
+    width: 575px;
     margin: 150px auto;
     padding: 20px;
     background-color: #fff;
@@ -365,4 +365,12 @@ footer {
 
 .dropdownSS:hover .dropbtnSS {
     background-color: #1f5bc2;
+}
+
+.sell {
+    color: #52f312;
+}
+
+.buy {
+    color: #ff0000;
 }

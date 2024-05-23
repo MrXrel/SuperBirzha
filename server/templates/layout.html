@@ -13,13 +13,13 @@
 </head>
 <body>
     <div class="navbaru">
-        <h2 href="#">МАИ Инвестиции</h2>
+        <h2>МАИ Инвестиции</h2>
         <div class="dropdownSS">
             <button class="dropbtnSS"><a href="{{ url_for('get_private_office')}}">Профиль</a>
                 <i class="fa fa-caret-down"></i>
             </button>
             <div class="dropdown-contentSS">
-                <a href="#hustory">История</a>
+                <a href="{{url_for('get_history')}}">История</a>
                 <a href="#pay_menu">Пополнить</a>
                 <a href="{{ url_for('user_logout')}}">Выйти</a>
             </div>
