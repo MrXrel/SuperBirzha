@@ -343,4 +343,3 @@ if __name__ == '__main__':
     # print(currency_info.get_all_shares())
     # print(currency_info.get_current_price_by_figi('TCS3013HRTL0'))
     print(currency_info.get_all_prices())
-
