@@ -84,7 +84,7 @@ class Database:
             Column("currency_id", ForeignKey("Currency.ID")),
             Column("quantity", Float(), default=0),
         )
-        self.list_of_currencies = ["dollar", "euro", "yuan", "gold"]
+        self.list_of_currencies = ["USD", "EUR", "CNY", "XAU"]
         self.metadata.create_all(self.engine)
         self.lastID = len(self.conn.execute(select(self.users)).fetchall())
         for i in self.list_of_currencies:
@@ -614,3 +614,8 @@ class Database:
             .where(self.tg_bot.c.ID == user_id)
             .values(time_to_note=new_delta)
         )
+
+
+if __name__ == "__main__":
+    dbase = Database()
+    print(dbase.get_briefcase_by_id(2))

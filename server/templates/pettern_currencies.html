@@ -11,12 +11,14 @@
             </center>
             <div><h3>{{curr.buy_price}} ₽</h3></div>
             <div class="buysell_position">
-                <button class="button_to_buy">
+            <form method="post">
+                <button class="button_to_buy" name="submit_buy">
                     <h5 style="color: white;">Купить</h5>
                 </button>
-                <button class="button_to_sell">
+                <button class="button_to_sell" name="submit_sell">
                     <h5 style="color: white;">Продать</h5>
                 </button>
+            </form>
             </div>
         </div>
         <div class="contain"><p>Тут вставить график</p></div>
