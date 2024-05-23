@@ -1,6 +1,8 @@
 from sqlalchemy import *
 from datetime import time, datetime
 
+from sqlalchemy.exc import DBAPIError
+
 
 class Database:
     def __init__(self):
@@ -91,9 +93,9 @@ class Database:
                 name=name
             ))
             self.lastID = r.inserted_primary_key[0]
-            return r.inserted_primary_key[0]
-        except Exception:
+        except DBAPIError:
             return 0
+        return r.inserted_primary_key[0]
 
     def add_currency(self, price: float, name: str) -> int:
         """
