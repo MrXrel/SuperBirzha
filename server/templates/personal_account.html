@@ -6,7 +6,7 @@
     <center>
         <div id="persacc">
 
-            <div><h4>Счёт в Рублях:</h4>{{ user.get_balance() }} ₽</div>
+            <div><h4>Счёт в Рублях:</h4>{{ user.get_balance()|round(2) }} ₽</div>
             <div><h5><b>{{ user.get_name() }} {{ user.get_surname() }}</b></h5>
             </div>
       

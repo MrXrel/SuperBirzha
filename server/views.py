@@ -1,4 +1,4 @@
-from server import app, dbase, CURRENCIES, parser_API
+from server import app, dbase, CURRENCIES, parser_API, metal_key, exchange_rate_key
 from flask import (
     render_template,
     request,
@@ -11,10 +11,9 @@ from flask import (
 from server import models, login_manager
 from .forms.Registration import RegistrationForm
 from .forms.Login import LoginForm
-from .forms.Button import BuySellButton
 from flask_login import login_user, current_user, login_required, logout_user
 from werkzeug.security import generate_password_hash, check_password_hash
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import json
 
 
@@ -23,40 +22,40 @@ def load_user(user_id):
     return models.UserLogin().fromDB(user_id, dbase)
 
 
+@app.get("/history")
+def get_history():
+    data = dbase.get_history_by_id(current_user.get_id())
+    for oper in data:
+        oper["currency_ID"] = dbase.get_currency_data_by_id(int(oper["currency_ID"]))[
+            "currency_name"
+        ]
+    return render_template("history.html", data=data)
+
+
+# Страница отдельной валюты
 @app.get("/currency/<currency_id>")
 def get_currency(currency_id):
-    form = BuySellButton()
-    low_price = parser_API.get_history_of_current_currency_by_ticker(
-        CURRENCIES[currency_id][0],
-        datetime.utcnow() - timedelta(hours=8),
-        datetime.utcnow(),
-    )[0]["low"]
-    high_price = parser_API.get_history_of_current_currency_by_ticker(
-        CURRENCIES[currency_id][0],
-        datetime.utcnow() - timedelta(hours=8),
-        datetime.utcnow(),
-    )[0]["high"]
+    price = price = parser_API.get_current_price_by_figi(
+        parser_API.get_figi_by_ticker(CURRENCIES[currency_id][0])
+    )
     data = models.Currency(
-        currency_id, CURRENCIES[currency_id][1], high_price, low_price
+        currency_id, CURRENCIES[currency_id][1], price, price - (price * 0.07)
     )
     with open("server/templates/about_currencies.json", "r") as js:
         json_dump = json.load(js)
         about = json_dump[currency_id]
-    return render_template("pettern_currencies.html", curr=data, about=about, form=form)
+    return render_template("pettern_currencies.html", curr=data, about=about)
 
 
 # Покупка/продажа валюты
 @app.post("/currency/<currency_id>")
 @login_required
-def post_buy_currency(currency_id):
+def post_buy_sell_currency(currency_id):
     data = {}
-
     for cuur in CURRENCIES:
-        price = parser_API.get_history_of_current_currency_by_ticker(
-            CURRENCIES[cuur][0],
-            datetime.utcnow() - timedelta(hours=6),
-            datetime.utcnow(),
-        )[0]["high"]
+        price = parser_API.get_current_price_by_figi(
+            parser_API.get_figi_by_ticker(CURRENCIES[cuur][0])
+        )
         data[cuur] = price
     dbase.update_currency(data)
     if "submit_buy" in request.form:
@@ -65,7 +64,7 @@ def post_buy_currency(currency_id):
             CURRENCIES[currency_id][2],
             "BUY",
             1,
-            datetime.utcnow(),
+            get_current_time(),
         )
     else:
         dbase.add_operation(
@@ -73,7 +72,7 @@ def post_buy_currency(currency_id):
             CURRENCIES[currency_id][2],
             "SELL",
             1,
-            datetime.utcnow(),
+            get_current_time(),
         )
     return redirect(url_for("get_currency", currency_id=currency_id))
 
@@ -83,18 +82,13 @@ def post_buy_currency(currency_id):
 def get_currencies():
     data = []
     for currency in CURRENCIES:
-        low_price = parser_API.get_history_of_current_currency_by_ticker(
-            CURRENCIES[currency][0],
-            datetime.utcnow() - timedelta(hours=6),
-            datetime.utcnow(),
-        )[0]["low"]
-        high_price = parser_API.get_history_of_current_currency_by_ticker(
-            CURRENCIES[currency][0],
-            datetime.utcnow() - timedelta(hours=6),
-            datetime.utcnow(),
-        )[0]["high"]
+        price = parser_API.get_current_price_by_figi(
+            parser_API.get_figi_by_ticker(CURRENCIES[currency][0])
+        )
         data.append(
-            models.Currency(currency, CURRENCIES[currency][1], high_price, low_price)
+            models.Currency(
+                currency, CURRENCIES[currency][1], price, price - (price * 0.07)
+            )
         )
 
     return render_template("currencies.html", curruncies=data)
@@ -158,3 +152,9 @@ def post_user_authorization():
 def user_logout():
     logout_user()
     return redirect(url_for("get_user_authorization"))
+
+
+# Получение московского времени
+def get_current_time() -> datetime:
+    delta = timedelta(hours=3, minutes=0)
+    return datetime.now(timezone.utc) + delta

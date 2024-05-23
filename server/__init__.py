@@ -13,6 +13,8 @@ CURRENCIES = {
     "EUR": ["EUR_RUB__TOM", "Eвро", 2],
 }
 token = "t.IEa99GPRoD0m0Z3MH_M2BUMIAVsqYMCpcmJhQFIKDw8rg3tk7CpENgicqyVpOMSTK1ubCt1ZB7SQCXTcEy0Dcw"
+metal_key = "0b5895bda9ed8dc32c3e2be0ade70f85"
+exchange_rate_key = "752cb5b3134f445168799121"
 
 
 app = Flask(__name__)

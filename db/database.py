@@ -618,4 +618,4 @@ class Database:
 
 if __name__ == "__main__":
     dbase = Database()
-    print(dbase.get_briefcase_by_id(2))
+    print(dbase.get_history_by_id(1))

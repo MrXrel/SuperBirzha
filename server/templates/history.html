@@ -1,6 +1,6 @@
 {% extends 'layout.html' %}
 
-{% block title %}Вход{% endblock %}
+{% block title %}История{% endblock %}
 
 {% block sign %}
     <div class="container">
@@ -14,14 +14,20 @@
                 </tr>
             </thead>
             <tbody>
+                {% for operation in data %}
                 <tr>
                     <th scope="row">
-                        <div id="front">Продажа/покупка чего</div>
-                        <a href="#" class="color-change-link">Код волюты</a>
+                        <div id="front">{{operation["time"].strftime('%Y-%m-%d %H:%M')}}</div>
+                        <a href="#" class="color-change-link">{{ operation["currency_ID"]}}</a>
                     </th>
-                    <td>0</td>
-                    <td><div><span>0</span> ₽</div> <!-- пишешь - или + -->
+                    <td>{{operation["quantity"]}}</td>
+                    {% if operation["type_of_operation"] == "BUY" or operation["type_of_operation"] == "WITHDRAW" %}
+                        <td><div class="buy"><span>-{{operation["price"]}}</span> ₽</div> <!-- пишешь - или + -->
+                    {% else %}
+                        <td><div class="sell"><span>+{{operation["price"]}}</span> ₽</div>
+                    {% endif %}
                 </tr>
+                {% endfor %}
             </tbody>
         </table>
     </div>
