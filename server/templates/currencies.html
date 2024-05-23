@@ -16,34 +16,15 @@
                     </tr>
                 </thead>
                 <tbody>
+                    {% for curr in curruncies %}
                     <tr>
-                        <th scope="row"><div id="front">Доллар США</div><a href="#" class="color-change-link">USD</a></th>
-                        <td><span>0</span> ₽</td>
-                        <td><span>0</span> %</td>
-                        <td><span>0</span> ₽</td>
-                        <td><span>0</span> %</td>
+                        <th scope="row"><div id="front">{{curr.ru_name }}</div><a href="{{url_for('get_currency', currency_id=curr.id)}}" class="color-change-link">{{curr.id}}</a></th>
+                            <td><span>{{ curr.buy_price }}</span> ₽</td>
+                            <td><span>0</span> %</td>
+                            <td><span>{{ curr.sell_price - (curr.sell_price * 0.07)}}</span> ₽</td>
+                            <td><span>0</span> %</td>
                     </tr>
-                    <tr>
-                        <th scope="row"><div id="front">Евро</div><a href="#" class="color-change-link">EUR</a></th>
-                        <td><span>0</span> ₽</td>
-                        <td><span>0</span> %</td>
-                        <td><span>0</span> ₽</td>
-                        <td><span>0</span> %</td>
-                    </tr>
-                    <tr>
-                        <th scope="row"><div id="front">Китайский юань</div><a href="#" class="color-change-link">CNY</a></th>
-                        <td><span>0</span> ₽</td>
-                        <td><span>0</span> %</td>
-                        <td><span>0</span> ₽</td>
-                        <td><span>0</span> %</td>
-                    </tr>
-                    <tr>
-                        <th scope="row"><div id="front">Bitcoin</div><a href="#" class="color-change-link">BTC</a></th>
-                        <td><span>0</span> ₽</td>
-                        <td><span>0</span> %</td>
-                        <td><span>0</span> ₽</td>
-                        <td><span>0</span> %</td>
-                    </tr>
+                    {% endfor %}
                 </tbody>
             </table>
         </div>

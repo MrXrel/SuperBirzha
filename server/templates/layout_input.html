@@ -15,17 +15,17 @@
     <div class="navbaru">
         <h2 href="#">МАИ Инвестиции</h2>
         <div class="dropdownSS">
-            <button class="dropbtnSS"><a href="{{ url_for('get_private_office')}}">Профиль</a>
+            <button class="dropbtnSS">Профиль
                 <i class="fa fa-caret-down"></i>
             </button>
             <div class="dropdown-contentSS">
                 <a href="#hustory">История</a>
                 <a href="#pay_menu">Пополнить</a>
-                <a href="{{ url_for('user_logout')}}">Выйти</a>
+                <a href="#logout">Выйти</a>
             </div>
-        </div>
         <a href="{{ url_for('get_currencies') }}">Валюта</a>
-        <a href="{{ url_for('get_about_us') }}">О нас</a>      
+        <a href="{{ url_for('get_about_us') }}">О нас</a>
+        </div> 
     </div>
     {% block sign %}
 

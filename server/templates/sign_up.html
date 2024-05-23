@@ -5,13 +5,33 @@
 {% block sign %}
 	<div class="container">
 		<h2>Регистрация</h2>
+		{% for msg in get_flashed_messages() %}
+		{{msg}}
+		{% endfor %}
 		<form method="Post" action="">
 			{{ form.hidden_tag() }}
 			<p> {{ form.name() }}
 			<p> {{ form.surname() }}
-			<p> {{ form.email() }}
+				{% if form.email.errors %}
+					<p>{{ form.email() }}
+						{% for e in form.email.errors%}
+						{{e}}<br>
+						{% endfor %}
+					</p>
+				{% else %}
+					{{ form.email() }}
+				{% endif %}
+				
 			<p> {{ form.password() }}
-			<p> {{ form.password_confirm() }}
+				{% if form.password_confirm.errors %}
+					<p> {{ form.password_confirm() }}
+						{% for e in form.password_confirm.errors%}
+						{{e}}<br>
+						{% endfor %}
+					</p>
+				{% else %}
+					{{ form.password_confirm() }}
+				{% endif %}
 			<p> {{ form.submit() }}
 		</form>
 	</div>
