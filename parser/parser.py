@@ -23,9 +23,6 @@ all_figi = {
     ("yuan", "CNY"): "TCS3013HRTL0",
     ("euro", "EUR"): "BBG0013HJJ31",
 }
-token = "t.IEa99GPRoD0m0Z3MH_M2BUMIAVsqYMCpcmJhQFIKDw8rg3tk7CpENgicqyVpOMSTK1ubCt1ZB7SQCXTcEy0Dcw"
-metal_key = "0b5895bda9ed8dc32c3e2be0ade70f85"
-exchange_rate_key = "752cb5b3134f445168799121"
 
 
 class CurrencyInfo:
@@ -36,15 +33,15 @@ class CurrencyInfo:
     полного перечня информации о каждой валюте. Используется токен для аутентификации на API Tinkoff Invest.
     """
 
-    def __init__(self, token: str) -> None:
+    def __init__(self, token: str, metal_key: str, exchange_rate_key: str) -> None:
         """
         Инициализация класса с токеном для аутентификации на API Tinkoff Invest.
 
         :param token: Токен для аутентификации на API Tinkoff Invest.
         """
         self.token = token
-        self.api_metal_key = "0b5895bda9ed8dc32c3e2be0ade70f85"
-        self.api_exchange_rate_key = "752cb5b3134f445168799121"
+        self.api_metal_key = metal_key
+        self.api_exchange_rate_key = exchange_rate_key
 
     def get_exchange_rate_of_currency(
         self, base_currency: str, target_currency: str
@@ -373,4 +370,4 @@ if __name__ == "__main__":
     # print(currency_info.get_all_shares())
     # print(currency_info.get_current_price_by_figi('TCS3013HRTL0'))
     print(currency_info.get_all_prices())
-    print(currency_info.get_current_price_by_ticker("GLDRUB_TOM"))
+    print(currency_info.get_current_price_by_ticker("USD000000TOD"))
