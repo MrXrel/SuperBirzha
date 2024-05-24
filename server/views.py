@@ -11,6 +11,7 @@ from flask import (
 from server import models, login_manager
 from .forms.Registration import RegistrationForm
 from .forms.Login import LoginForm
+from .forms.PayMenu import PayDeposit
 from flask_login import login_user, current_user, login_required, logout_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime, timedelta, timezone
@@ -22,10 +23,34 @@ def load_user(user_id):
     return models.UserLogin().fromDB(user_id, dbase)
 
 
+# Пополнение счета
+@app.get("/pay")
+@login_required
+def get_pay():
+    form = PayDeposit()
+    return render_template("pay.html", form=form)
+
+
+@app.post("/pay")
+def post_pay():
+    count = request.form["count"]
+    res = dbase.change_balance(
+        current_user.get_id(), float(count), "DEPOSIT", get_current_time()
+    )
+    if res == 0:
+        flash("Недостаточно средств")
+        return redirect(url_for("get_pay"))
+    return redirect(url_for("get_private_office"))
+
+
+# Страничца с историей операций
 @app.get("/history")
+@login_required
 def get_history():
     data = dbase.get_history_by_id(current_user.get_id())
     for oper in data:
+        if int(oper["currency_ID"]) == 0:
+            continue
         oper["currency_ID"] = dbase.get_currency_data_by_id(int(oper["currency_ID"]))[
             "currency_name"
         ]
@@ -80,6 +105,13 @@ def post_buy_sell_currency(currency_id):
 # Страница со всеми валютами
 @app.get("/currencies")
 def get_currencies():
+    data = {}
+    for cuur in CURRENCIES:
+        price = parser_API.get_current_price_by_figi(
+            parser_API.get_figi_by_ticker(CURRENCIES[cuur][0])
+        )
+        data[cuur] = price
+    dbase.update_currency(data)
     data = []
     for currency in CURRENCIES:
         price = parser_API.get_current_price_by_figi(
@@ -104,7 +136,11 @@ def get_about_us():
 @app.route("/private-office")
 @login_required
 def get_private_office():
-    return render_template("personal_account.html", user=current_user)
+    print(current_user.get_id())
+    data = dbase.get_briefcase_by_id(current_user.get_id())
+    for oper in data:
+        data[oper]["name_currency"] = CURRENCIES[oper][1]
+    return render_template("personal_account.html", user=current_user, data=data)
 
 
 # Страница регистрации
@@ -117,6 +153,7 @@ def user_registration():
             data = dbase.create_user(
                 form.email.data, hash, form.surname.data, form.name.data
             )
+            print(data)
             if data == 0:
                 flash("Пользователь с такой почтой уже существует.")
                 return redirect(url_for("user_registration"))
@@ -137,6 +174,9 @@ def post_user_authorization():
     email = request.form["email"]
     psw = request.form["password"]
     user = dbase.get_user_data_by_email(email)
+    if user == 0:
+        flash("Такого пользователя не существует")
+        return redirect(url_for("get_user_authorization"))
     if check_password_hash(user["password"], psw):
         userlogin = models.UserLogin().create(user)
         login_user(userlogin)
