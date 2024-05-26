@@ -49,9 +49,8 @@ h5 {
 input[type="text"],
 input[type="password"],
 input[type="submit"] {
-    width: 100%;
-    padding: 10px;
-    margin-bottom: 10px;
+    width: 90%;
+    height: 40px;
     border: 1px solid #ccc;
     border-radius: 3px;
 }
@@ -156,33 +155,31 @@ footer {
 
 }
 
+
 .button_to_buy {
-    display: flex;
     text-align: center;
     display: inline-block;
-    width: 120px;
-    height: 65px;
-    padding: 20px;
+    width: 100px;
+    height: 50px;
     background:#a3e9a4;
-    border-radius: 20px;
+    border-radius: 10px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     position: relative;
-    top: 20px;
-    
+    top: 10px;
+    margin: auto;
 }
 
 .button_to_sell {
-    display: flex;
     text-align: center;
     display: inline-block;
-    width:120px;
-    height:65px;
-    padding: 20px;
+    width:100px;
+    height:50px;
     background:#fa8072;
-    border-radius: 20px;
+    border-radius: 10px;
     box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
     position: relative;
-    top: 20px;
+    top: 10px;
+    margin: auto;
 }
 
 .cont {
@@ -367,12 +364,11 @@ footer {
     background-color: #1f5bc2;
 }
 
-.sell {
-    color: #52f312;
-}
-
 .buy {
-    color: #ff0000;
+    color: #fc0c0c;
+}
+.sell {
+    color: #33ff47;
 }
 
 .pay-container {
@@ -394,4 +390,8 @@ footer {
     color: #858585;
     background-color: #fff;
     margin-bottom: 10px;
+}
+
+.input_count {
+    width: 100%;
 }

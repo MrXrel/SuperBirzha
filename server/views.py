@@ -97,6 +97,7 @@ def get_currency(currency_id):
 @login_required
 def post_buy_sell_currency(currency_id):
     data = {}
+    count_currency = float(request.form["count"])
     for cuur in CURRENCIES:
         price = parser_API.get_current_price_by_figi(
             parser_API.get_figi_by_ticker(CURRENCIES[cuur][0])
@@ -108,7 +109,7 @@ def post_buy_sell_currency(currency_id):
             current_user.get_id(),
             CURRENCIES[currency_id][2],
             "BUY",
-            1,
+            count_currency,
             get_current_time(),
         )
     else:
@@ -116,7 +117,7 @@ def post_buy_sell_currency(currency_id):
             current_user.get_id(),
             CURRENCIES[currency_id][2],
             "SELL",
-            1,
+            count_currency,
             get_current_time(),
         )
     return redirect(url_for("get_currency", currency_id=currency_id))

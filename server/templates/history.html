@@ -19,17 +19,17 @@
                     <th scope="row">
                         <div id="front">{{operation["time"].strftime('%Y-%m-%d %H:%M')}}</div>
                         {% if operation["type_of_operation"] == "WITHDRAW"  %}
-                            <a href="#" class="color-change-link">Вывод средств</a>
+                            <a class="color-change-link">Вывод средств</a>
                         {% elif operation["type_of_operation"] == "DEPOSIT" %}
-                            <a href="#" class="color-change-link">Пополнение баланса</a>
+                            <a class="color-change-link">Пополнение баланса</a>
                         {% else %}
-                            <a href="#" class="color-change-link">{{ operation["currency_ID"] }}</a>
+                            <a href="{{url_for('get_currency', currency_id=operation['currency_ID'])}}" class="color-change-link">{{ operation["currency_ID"] }}</a>
                         {% endif %}
                     </th>
                     
                     {% if operation["type_of_operation"] == "BUY"  %}
                         <td>{{operation["quantity"]}}</td>
-                        <td><div class="buy"><span>-{{operation["price"]|round(2)}}</span> ₽</div> <!-- пишешь - или + -->
+                        <td><div class="buy"><span>-{{(operation["price"] * operation["quantity"])|round(2)}}</span> ₽</div> <!-- пишешь - или + -->
                     {% elif operation["type_of_operation"] == "WITHDRAW" %}   
                         <td>-</td>
                         <td><div class="buy"><span>-{{operation["quantity"]|round(2)}}</span> ₽</div>
@@ -38,7 +38,7 @@
                         <td><div class="sell"><span>+{{operation["quantity"]|round(2)}}</span> ₽</div>
                     {% else %}
                         <td>{{operation["quantity"]}}</td>
-                        <td><div class="sell"><span>+{{operation["price"]|round(2)}}</span> ₽</div>
+                        <td><div class="sell"><span>+{{(operation["price"] * operation["quantity"])|round(2)}}</span> ₽</div>
                     {% endif %}
                 </tr>
                 {% endfor %}
