@@ -21,12 +21,17 @@
                     </tr>
                 </thead>
                 <tbody>
+                    {% for case in data %}
+                    {% if data[case]["quantity"] > 0 %}
                     <tr>
-                        <th scope="row"><div id="front">Валюта</div><a href="#" class="color-change-link">Код валюты</a></th>
-                        <td><span>0</span> $</td>
-                        <td><div><span>0</span> ₽</div> 
-                        <div id="back">0 %</div></td>
+                        <th scope="row"><div id="front">{{ data[case]["name_currency"] }}</div><a href="{{url_for('get_currency', currency_id=case)}}" class="color-change-link">{{ case }}</a></th>
+                        <td><span>{{ data[case]["quantity"] }}</span></td>
+                        <td><div><span>{{ data[case]["selling_amount"]|round(2) }}</span> ₽</div> 
+                        <div id="back">{{ data[case]["profitability"]|round(4)}} %</div></td>
                     </tr>
+                    {% endif %}
+                    {% endfor %}
+                    
                 </tbody>
             </table>
         </div>
