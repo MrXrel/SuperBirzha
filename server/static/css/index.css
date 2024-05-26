@@ -90,6 +90,8 @@ input[type="submit"]:hover {
     width: 800px auto;
     height: 250px auto;
     padding: 20px;
+    margin-left: 10px;
+    margin-right: 10px;
     background:#fff;
     border-radius: 20px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
@@ -140,10 +142,13 @@ footer {
 
 #aboutcurrencies {
     display: flex;
-    width:800px auto;
+    width: 70%;
     height:400px auto;
     padding: 20px;
+    margin-bottom: 100px;
     background:#fff;
+    text-align: center;
+    align-content: center;
     border-radius: 20px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     position: relative;
@@ -203,7 +208,7 @@ footer {
 }
 
 .contain {
-    width: 1000px;
+    width: 1135px;
     margin: 150px auto;
     padding: 20px;
     background-color: #fff;
@@ -409,4 +414,22 @@ footer {
     height: 40px;
     border: 1px solid #ccc;
     border-radius: 3px;
+}
+
+.graph_settings {
+    display: inline-block;
+    align-items: stretch;
+}
+
+.graph {
+    display: inline-block;
+}
+
+.graph_contain {
+    width: 1135px;
+    margin: 50px auto;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }

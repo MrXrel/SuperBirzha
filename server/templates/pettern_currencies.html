@@ -29,7 +29,20 @@
             </form>
             </div>
         </div>
-        <div class="contain"><p>Тут вставить график</p></div>
+    </center>
+        <div class="graph_contain">
+            <div class="graph">
+                {{ the_div|safe }}
+                {{ the_script|safe }}
+            </div>
+            <div class="graph_settigns">
+                <button>Дата1</button>
+                <button>Дата2</button>
+                <button>Дата3</button>
+                <button>Дата4</button>
+            </div>
+        </div>
+    <center>
         <div id="aboutcurrencies">
             <div><h2><b>О Валюте</b></h2>
                 <div>
@@ -38,7 +51,8 @@
                 </div>
             </div>
         </div>
+    </center>
                 
         
-    </center>
+    
 {% endblock %}

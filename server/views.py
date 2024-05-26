@@ -1,4 +1,11 @@
-from server import app, dbase, CURRENCIES, parser_API, metal_key, exchange_rate_key
+from server import (
+    app,
+    dbase,
+    CURRENCIES,
+    parser_API,
+    metal_key,
+    exchange_rate_key,
+)
 from flask import (
     render_template,
     request,
@@ -12,9 +19,11 @@ from server import models, login_manager
 from .forms.Registration import RegistrationForm
 from .forms.Login import LoginForm
 from .forms.PayMenu import PayDeposit, PayWithdraw
+from .graph import build_graph, get_start_time
 from flask_login import login_user, current_user, login_required, logout_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime, timedelta, timezone
+from bokeh.embed import components
 import json
 
 
@@ -93,7 +102,22 @@ def get_currency(currency_id):
     with open("server/templates/about_currencies.json", "r") as js:
         json_dump = json.load(js)
         about = json_dump[currency_id]
-    return render_template("pettern_currencies.html", curr=data, about=about)
+    graph = build_graph(
+        parser_API,
+        CURRENCIES[currency_id][0],
+        start_time=get_start_time(hours=59),
+        end_time=get_start_time(),
+        interval="1hour",
+    )
+    script, div = components(graph)
+
+    return render_template(
+        "pettern_currencies.html",
+        curr=data,
+        about=about,
+        the_div=div,
+        the_script=script,
+    )
 
 
 # Покупка/продажа валюты
@@ -128,7 +152,7 @@ def post_buy_sell_currency(currency_id):
             get_current_time(),
         )
         if res == 0:
-            flash("Недостаточно средств")
+            flash("Недостаточно валюты")
             return redirect(url_for("get_currency", currency_id=currency_id))
     return redirect(url_for("get_currency", currency_id=currency_id))
 
