@@ -9,3 +9,11 @@ class PayDeposit(FlaskForm):
         render_kw={"placeholder": "Введите желаему сумму"},
     )
     submit = SubmitField("Пополнить")
+
+
+class PayWithdraw(FlaskForm):
+    count = StringField(
+        validators=[DataRequired()],
+        render_kw={"placeholder": "Введите желаему сумму"},
+    )
+    submit = SubmitField("Вывести")

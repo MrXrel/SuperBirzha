@@ -12,7 +12,7 @@ from datetime import datetime, timedelta
 import requests
 
 #             TICKER        FIGI
-# ЗОЛОТО     GLDRUB_TOM    BBG000VJ5YR4
+# ЗОЛОТО     GLDRUB_TOM    BBG000VJ5YR4SSSSS
 # ДОЛЛАР     USD000000TOD  TCS0013HGFT4
 # ЮАНЬ       CNYRUB_TMS    TCS3013HRTL0
 # ЕВРО       EUR_RUB__TOM  BBG0013HJJ31
@@ -72,7 +72,6 @@ class CurrencyInfo:
         url = f"https://api.metalpriceapi.com/v1/latest?api_key={self.api_metal_key}&base={base_currency}&currencies={target_currency}"
         response = requests.get(url)
         data = response.json()
-
         rates = data["rates"]["RUB"]
 
         return rates

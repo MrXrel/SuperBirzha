@@ -1,0 +1,19 @@
+{% extends 'layout.html' %}
+
+{% block title %}Вывод средств{% endblock %}
+
+{% block sign %}
+    <div class="pay-container">
+        <select class="pay-select">
+            <option value="" disabled selected>Выберите платежную систему</option>
+            <option value="option2">ЮMoney</option>
+            <option value="option3">СПБ</option>
+            <option value="option4">Банковская карта</option>
+        </select>
+        <form method="post">
+            {{form.count()}}
+            {{form.submit()}}
+        </form>
+    </div>
+    
+{% endblock %}
