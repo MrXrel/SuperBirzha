@@ -34,12 +34,16 @@ def get_withdraw_pay():
 @app.post("/pay-withdraw")
 def post_withdraw_pay():
     count = request.form["count"]
+    balance = dbase.get_user_data_by_id(current_user.get_id())["balance"]
+    if balance - float(count) < 0:
+        flash("Недостаточно средств")
+        return redirect(url_for("get_withdraw_pay"))
     res = dbase.change_balance(
         current_user.get_id(), float(count), "WITHDRAW", get_current_time()
     )
     if res == 0:
         flash("Недостаточно средств")
-        return redirect(url_for("get_deposit_pay"))
+        return redirect(url_for("get_withdraw_pay"))
     return redirect(url_for("get_private_office"))
 
 
@@ -105,21 +109,27 @@ def post_buy_sell_currency(currency_id):
         data[cuur] = price
     dbase.update_currency(data)
     if "submit_buy" in request.form:
-        dbase.add_operation(
+        res = dbase.add_operation(
             current_user.get_id(),
             CURRENCIES[currency_id][2],
             "BUY",
             count_currency,
             get_current_time(),
         )
+        if res == 0:
+            flash("Недостаточно средств")
+            return redirect(url_for("get_currency", currency_id=currency_id))
     else:
-        dbase.add_operation(
+        res = dbase.add_operation(
             current_user.get_id(),
             CURRENCIES[currency_id][2],
             "SELL",
             count_currency,
             get_current_time(),
         )
+        if res == 0:
+            flash("Недостаточно средств")
+            return redirect(url_for("get_currency", currency_id=currency_id))
     return redirect(url_for("get_currency", currency_id=currency_id))
 
 

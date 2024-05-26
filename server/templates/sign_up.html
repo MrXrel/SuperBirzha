@@ -6,7 +6,9 @@
 	<div class="container-reg-aut">
 		<h2>Регистрация</h2>
 		{% for msg in get_flashed_messages() %}
-		{{msg}}
+		<div class="error_box">
+		    {{msg}}
+        </div>
 		{% endfor %}
 		<form method="Post" action="">
 			{{ form.hidden_tag() }}
@@ -15,7 +17,9 @@
 				{% if form.email.errors %}
 					<p>{{ form.email() }}
 						{% for e in form.email.errors%}
-						{{e}}<br>
+						<div class="error_box">
+							{{e}}<br>
+						</div>
 						{% endfor %}
 					</p>
 				{% else %}
@@ -26,7 +30,9 @@
 				{% if form.password_confirm.errors %}
 					<p> {{ form.password_confirm() }}
 						{% for e in form.password_confirm.errors%}
-						{{e}}<br>
+						<div class="error_box">
+							{{e}}<br>
+						</div>
 						{% endfor %}
 					</p>
 				{% else %}

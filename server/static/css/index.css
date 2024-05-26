@@ -49,11 +49,13 @@ h5 {
 input[type="text"],
 input[type="password"],
 input[type="submit"] {
-    width: 90%;
-    height: 40px;
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
     border: 1px solid #ccc;
     border-radius: 3px;
 }
+
 
 input[type="submit"] {
     background-color: #337DFF;
@@ -247,6 +249,7 @@ footer {
 }
 
 
+
 .button_SBP{
     display: flex;
     align-items: center;
@@ -378,7 +381,7 @@ footer {
     background-color: #fff;
     border-radius: 10px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    text-align: center;
+
 }
 
 .pay-select {
@@ -392,6 +395,18 @@ footer {
     margin-bottom: 10px;
 }
 
+.error_box {
+    background-color: #FEE;
+    border: 1px solid #EDD;
+    border-radius: 5px;
+    color: #A66;
+    margin-bottom: 10px;
+    padding-left: 3px;
+}
+
 .input_count {
-    width: 100%;
+    width: 90%;
+    height: 40px;
+    border: 1px solid #ccc;
+    border-radius: 3px;
 }

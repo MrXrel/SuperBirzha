@@ -12,8 +12,13 @@
             <div><h3>{{curr.buy_price|round(2)}} ₽</h3></div>
             <div class="buysell_position">
             <form method="post">
+                {% for msg in get_flashed_messages() %}
+                <div class="error_box">
+                    {{msg}}
+                </div>
+                {% endfor %}
                 <div class="input_count">
-                    <input  type="text" name="count" placeholder="Количество валюты" required minlength="1"/>
+                    <input class="input_count" type="text" name="count" placeholder="Количество валюты" required minlength="1"/>
                 </div>
                 <button class="button_to_buy" name="submit_buy">
                     <h5 style="color: white;">Купить</h5>

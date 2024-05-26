@@ -279,6 +279,30 @@ class Database:
             select(self.currency.c.price).where(self.currency.c.ID == currency_id)
         ).fetchall()[0][0]
 
+        # изменение баланса в Users
+        old_balance = self.conn.execute(
+            select(self.users.c.balance).where(self.users.c.ID == user_id)
+        ).fetchall()[0][0]
+
+        # изменение количества в Briefcase
+        old_quantity = self.conn.execute(
+            select(self.briefcase.c.quantity).where(
+                self.briefcase.c.user_id == user_id,
+                self.briefcase.c.currency_id == currency_id,
+            )
+        ).fetchall()[0][0]
+
+        k = 0
+        if type_of_operation == "SELL":
+            print(old_quantity - quantity)
+            if old_quantity - quantity < 0:
+                return 0  # недостаточно валюты
+            k = 1
+        elif type_of_operation == "BUY":
+            if old_balance < price * quantity:
+                return 0  # недостаточно средств
+            k = -1
+
         # вставка записи в Operations
         ins = insert(self.operations).values(
             user_ID=user_id,
@@ -291,31 +315,11 @@ class Database:
 
         r = self.conn.execute(ins)
 
-        # изменение баланса в Users
-        old_balance = self.conn.execute(
-            select(self.users.c.balance).where(self.users.c.ID == user_id)
-        ).fetchall()[0][0]
-
-        k = 0
-        if type_of_operation == "SELL":
-            k = 1
-        elif type_of_operation == "BUY":
-            if old_balance < price * quantity:
-                return 0  # недостаточно средств
-            k = -1
         self.conn.execute(
             update(self.users)
             .where(self.users.c.ID == user_id)
             .values(balance=old_balance + price * quantity * k)
         )
-
-        # изменение количества в Briefcase
-        old_quantity = self.conn.execute(
-            select(self.briefcase.c.quantity).where(
-                self.briefcase.c.user_id == user_id,
-                self.briefcase.c.currency_id == currency_id,
-            )
-        ).fetchall()[0][0]
 
         self.conn.execute(
             update(self.briefcase)

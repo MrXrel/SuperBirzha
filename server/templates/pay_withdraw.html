@@ -4,6 +4,11 @@
 
 {% block sign %}
     <div class="pay-container">
+        {% for msg in get_flashed_messages() %}
+		<div class="error_box">
+		    {{msg}}
+        </div>
+		{% endfor %}
         <select class="pay-select">
             <option value="" disabled selected>Выберите платежную систему</option>
             <option value="option2">ЮMoney</option>
