@@ -21,7 +21,7 @@ from .forms.PayMenu import PayDeposit, PayWithdraw
 from .graph import build_graph_candles, get_start_time, build_graph_line
 from flask_login import login_user, current_user, login_required, logout_user
 from werkzeug.security import generate_password_hash, check_password_hash
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta, timezone, time
 from bokeh.embed import components
 import json
 
@@ -118,6 +118,7 @@ def get_currency(currency_id, time="1h", graph_type="lines", colour="standart"):
                 start_time=get_start_time(hours=times_for_graphs[time][0]),
                 end_time=get_start_time(),
                 interval=times_for_graphs[time][1],
+                color=colour,
             )
         else:
             graph = build_graph_line(
@@ -126,6 +127,7 @@ def get_currency(currency_id, time="1h", graph_type="lines", colour="standart"):
                 start_time=get_start_time(hours=times_for_graphs[time][0]),
                 end_time=get_start_time(),
                 interval=times_for_graphs[time][1],
+                color=colour,
             )
     except (KeyError, ValueError):
         return redirect(url_for("get_private_office"))
@@ -153,7 +155,8 @@ def post_buy_sell_currency(
     currency_id, time="1h", graph_type="lines", colour="standart"
 ):
     data = {}
-
+    if "colour" in request.form:
+        colour = request.form["colour"]
     if "graph_type" in request.form:
         graph_type = request.form["graph_type"]
     if "time" in request.form:
@@ -229,6 +232,15 @@ def post_buy_sell_currency(
                     colour=colour,
                 )
             )
+    return redirect(
+        url_for(
+            "get_currency",
+            currency_id=currency_id,
+            time=time,
+            graph_type=graph_type,
+            colour=colour,
+        )
+    )
 
 
 # Страница со всеми валютами
@@ -279,6 +291,11 @@ def get_private_office():
 @app.post("/private-office")
 @login_required
 def post_private_office():
+    if "time" in request.form:
+        hour, minutes = map(int, request.form["time"].split(":"))
+        dbase.update_time_to_note(
+            current_user.get_id(), time(hour=(hour + 21) % 24, minute=minutes)
+        )
     if "tg_id" in request.form:
         tg_id = request.form["tg_id"]
         count = request.form["count"]
