@@ -24,7 +24,7 @@
                             {% elif operation["type_of_operation"] == "DEPOSIT" %}
                                 <a class="color-change-link">Пополнение баланса</a>
                             {% else %}
-                                <a href="{{url_for('get_currency', currency_id=operation['currency_ID'], time='1h')}}" class="color-change-link">{{ operation["currency_ID"] }}</a>
+                                <a href="{{url_for('get_currency', currency_id=operation['currency_ID'], time='1year', graph_type='lines', colour='standart')}}" class="color-change-link">{{ operation["currency_ID"] }}</a>
                             {% endif %}
                         </th>
                         

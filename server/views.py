@@ -18,7 +18,7 @@ from server import models, login_manager
 from .forms.Registration import RegistrationForm
 from .forms.Login import LoginForm
 from .forms.PayMenu import PayDeposit, PayWithdraw
-from .graph import build_graph, get_start_time
+from .graph import build_graph_candles, get_start_time, build_graph_line
 from flask_login import login_user, current_user, login_required, logout_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime, timedelta, timezone
@@ -99,8 +99,8 @@ def get_history():
 
 
 # Страница отдельной валюты
-@app.get("/currency/<currency_id>/<time>")
-def get_currency(currency_id, time="1h"):
+@app.get("/currency/<currency_id>/<time>/<graph_type>/<colour>")
+def get_currency(currency_id, time="1h", graph_type="lines", colour="standart"):
     price = price = parser_API.get_current_price_by_figi(
         parser_API.get_figi_by_ticker(CURRENCIES[currency_id][0])
     )
@@ -110,14 +110,26 @@ def get_currency(currency_id, time="1h"):
     with open("server/templates/about_currencies.json", "r", encoding="utf8") as js:
         json_dump = json.load(js)
         about = json_dump[currency_id]
+    try:
+        if graph_type == "candles":
+            graph = build_graph_candles(
+                parser_API,
+                CURRENCIES[currency_id][0],
+                start_time=get_start_time(hours=times_for_graphs[time][0]),
+                end_time=get_start_time(),
+                interval=times_for_graphs[time][1],
+            )
+        else:
+            graph = build_graph_line(
+                parser_API,
+                CURRENCIES[currency_id][0],
+                start_time=get_start_time(hours=times_for_graphs[time][0]),
+                end_time=get_start_time(),
+                interval=times_for_graphs[time][1],
+            )
+    except (KeyError, ValueError):
+        return redirect(url_for("get_private_office"))
 
-    graph = build_graph(
-        parser_API,
-        CURRENCIES[currency_id][0],
-        start_time=get_start_time(hours=times_for_graphs[time][0]),
-        end_time=get_start_time(),
-        interval=times_for_graphs[time][1],
-    )
     try:
         script, div = components(graph)
     except ValueError:
@@ -130,15 +142,20 @@ def get_currency(currency_id, time="1h"):
         about=about,
         the_div=div,
         the_script=script,
+        colour=colour,
     )
 
 
 # Покупка/продажа валюты
-@app.post("/currency/<currency_id>/<time>")
+@app.post("/currency/<currency_id>/<time>/<graph_type>/<colour>")
 @login_required
-def post_buy_sell_currency(currency_id, time="1h"):
+def post_buy_sell_currency(
+    currency_id, time="1h", graph_type="lines", colour="standart"
+):
     data = {}
 
+    if "graph_type" in request.form:
+        graph_type = request.form["graph_type"]
     if "time" in request.form:
         time = request.form["time"]
     if "count" in request.form:
@@ -147,9 +164,25 @@ def post_buy_sell_currency(currency_id, time="1h"):
             count_currency = float(count_currency)
         except ValueError:
             flash("Введите число")
-            return redirect(url_for("get_currency", currency_id=currency_id, time=time))
+            return redirect(
+                url_for(
+                    "get_currency",
+                    currency_id=currency_id,
+                    time=time,
+                    graph_type=graph_type,
+                    colour=colour,
+                )
+            )
     else:
-        return redirect(url_for("get_currency", currency_id=currency_id, time=time))
+        return redirect(
+            url_for(
+                "get_currency",
+                currency_id=currency_id,
+                time=time,
+                graph_type=graph_type,
+                colour=colour,
+            )
+        )
 
     for cuur in CURRENCIES:
         price = parser_API.get_current_price_by_figi(
@@ -168,7 +201,15 @@ def post_buy_sell_currency(currency_id, time="1h"):
         )
         if res == 0:
             flash("Недостаточно средств")
-            return redirect(url_for("get_currency", currency_id=currency_id, time=time))
+            return redirect(
+                url_for(
+                    "get_currency",
+                    currency_id=currency_id,
+                    time=time,
+                    graph_type=graph_type,
+                    colour=colour,
+                )
+            )
     else:
         res = dbase.add_operation(
             current_user.get_id(),
@@ -179,9 +220,15 @@ def post_buy_sell_currency(currency_id, time="1h"):
         )
         if res == 0:
             flash("Недостаточно валюты")
-            return redirect(url_for("get_currency", currency_id=currency_id, time=time))
-
-    return redirect(url_for("get_currency", currency_id=currency_id, time=time))
+            return redirect(
+                url_for(
+                    "get_currency",
+                    currency_id=currency_id,
+                    time=time,
+                    graph_type=graph_type,
+                    colour=colour,
+                )
+            )
 
 
 # Страница со всеми валютами

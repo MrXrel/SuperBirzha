@@ -46,58 +46,63 @@ def build_graph_candles(
     colors = {"standart": ["blue", "red"], "daltonic": ["#6495ED", "#BDB76B"]}
 
     for el in data:
-        el['change'] = (el['close'] - el['open'])/100
+        el["change"] = (el["close"] - el["open"]) / 100
     data = {i: data[i] for i in range(len(data))}
     data = pd.DataFrame.from_dict(data, orient="index")
     # data['change'] =
-    source = ColumnDataSource(data=dict(
-        time=data["time"].tolist(),
-        open=data["open"].tolist(),
-        volume=data["volume"].tolist(),
-        close=data["close"].tolist(),
-        high=data["high"].tolist(),
-        low=data["low"].tolist(),
-        change=data['change'].tolist(),
-    ))
+    source = ColumnDataSource(
+        data=dict(
+            time=data["time"].tolist(),
+            open=data["open"].tolist(),
+            volume=data["volume"].tolist(),
+            close=data["close"].tolist(),
+            high=data["high"].tolist(),
+            low=data["low"].tolist(),
+            change=data["change"].tolist(),
+        )
+    )
     try:
         data_inc = data[data["close"] > data["open"]]
-        print(data_inc)
         data_dec = data[data["open"] > data["close"]]
 
-        source_inc = ColumnDataSource(data=dict(
-            time=data_inc["time"].tolist(),
-            open=data_inc["open"].tolist(),
-            volume=data_inc["volume"].tolist(),
-            close=data_inc["close"].tolist(),
-            high=data_inc["high"].tolist(),
-            low=data_inc["low"].tolist(),
-            change=data_inc['change'].tolist()
-        ))
-        source_dec = ColumnDataSource(data=dict(
-            time=data_dec["time"].tolist(),
-            open=data_dec["open"].tolist(),
-            volume=data_dec["volume"].tolist(),
-            close=data_dec["close"].tolist(),
-            high=data_dec["high"].tolist(),
-            low=data_dec["low"].tolist(),
-            change=data_dec['change'].tolist()
-        ))
+        source_inc = ColumnDataSource(
+            data=dict(
+                time=data_inc["time"].tolist(),
+                open=data_inc["open"].tolist(),
+                volume=data_inc["volume"].tolist(),
+                close=data_inc["close"].tolist(),
+                high=data_inc["high"].tolist(),
+                low=data_inc["low"].tolist(),
+                change=data_inc["change"].tolist(),
+            )
+        )
+        source_dec = ColumnDataSource(
+            data=dict(
+                time=data_dec["time"].tolist(),
+                open=data_dec["open"].tolist(),
+                volume=data_dec["volume"].tolist(),
+                close=data_dec["close"].tolist(),
+                high=data_dec["high"].tolist(),
+                low=data_dec["low"].tolist(),
+                change=data_dec["change"].tolist(),
+            )
+        )
 
     except KeyError:
         return "BirzhaIsClosed"
-    with pd.option_context('display.max_rows', None, 'display.max_columns', None):  # more options can be specified also
-        print(data)
     w = width_of_candle[interval]  # trading time in ms
 
     TOOLS = "pan,wheel_zoom,box_zoom,reset,save"
 
-    TOOLTIPS = [("Date", "@time{%d.%m.%Y %H:%M}"),
-                ("Open", '@open{0.2f}'),
-                ("High", "@high{0.2f}"),
-                ("Low", "@low{0.2f}"),
-                ("Close", "@close{0.2f}"),
-                ("Change", "@change{0.4f}"),
-                ("Volume", "@volume{0.2f}")]
+    TOOLTIPS = [
+        ("Date", "@time{%d.%m.%Y %H:%M}"),
+        ("Open", "@open{0.2f}"),
+        ("High", "@high{0.2f}"),
+        ("Low", "@low{0.2f}"),
+        ("Close", "@close{0.2f}"),
+        ("Change", "@change{0.4f}"),
+        ("Volume", "@volume{0.2f}"),
+    ]
 
     hover_tool = HoverTool(tooltips=TOOLTIPS, formatters={"@time": "datetime"})
     p = figure(
@@ -110,26 +115,24 @@ def build_graph_candles(
     p.xaxis.major_label_orientation = pi / 4
     p.grid.grid_line_alpha = 0.3
 
-    p.segment(x0='time', y0='high', x1="time", y1="low", source=source, color="black")
+    p.segment(x0="time", y0="high", x1="time", y1="low", source=source, color="black")
     p.vbar(
         width=w,
         fill_color=colors[color][0],
         line_color="black",
-        x='time',
-        top='open',
-        bottom='close',
-        source=source_inc
-
+        x="time",
+        top="open",
+        bottom="close",
+        source=source_inc,
     )
     p.vbar(
         width=w,
         fill_color=colors[color][1],
         line_color="black",
-        x='time',
-        top='open',
-        bottom='close',
-        source=source_dec
-
+        x="time",
+        top="open",
+        bottom="close",
+        source=source_dec,
     )
     return p
 
@@ -146,26 +149,30 @@ def build_graph_line(
         ticker, start_time, end_time, intervals[interval]
     )
     for el in data:
-        el['change'] = (el['close'] - el['open']) / 100
+        el["change"] = (el["close"] - el["open"]) / 100
     data = {i: data[i] for i in range(len(data))}
     data = pd.DataFrame.from_dict(data, orient="index")
     # data['change'] =
-    source = ColumnDataSource(data=dict(
-        time=data["time"].tolist(),
-        open=data["open"].tolist(),
-        volume=data["volume"].tolist(),
-        close=data["close"].tolist(),
-        high=data["high"].tolist(),
-        low=data["low"].tolist(),
-        change=data['change'].tolist(),
-    ))
+    source = ColumnDataSource(
+        data=dict(
+            time=data["time"].tolist(),
+            open=data["open"].tolist(),
+            volume=data["volume"].tolist(),
+            close=data["close"].tolist(),
+            high=data["high"].tolist(),
+            low=data["low"].tolist(),
+            change=data["change"].tolist(),
+        )
+    )
     TOOLS = "pan,wheel_zoom,box_zoom,reset,save"
-    TOOLTIPS = [("Date", "@time{%d.%m.%Y %H:%M}"),
-                ('Open', '@open{0.2f}'),
-                ("Close", "@close{0.2f}"),
-                ("Volume", "@volume{0.2f}"),
-                ("Change", "@change{0.4f}")]
-    hover_tool = HoverTool(tooltips=TOOLTIPS, formatters={"@time":"datetime"})
+    TOOLTIPS = [
+        ("Date", "@time{%d.%m.%Y %H:%M}"),
+        ("Open", "@open{0.2f}"),
+        ("Close", "@close{0.2f}"),
+        ("Volume", "@volume{0.2f}"),
+        ("Change", "@change{0.4f}"),
+    ]
+    hover_tool = HoverTool(tooltips=TOOLTIPS, formatters={"@time": "datetime"})
     p = figure(
         x_axis_type="datetime",
         width=1000,
@@ -175,7 +182,7 @@ def build_graph_line(
     p.xaxis.major_label_orientation = pi / 4
     p.grid.grid_line_alpha = 0.3
 
-    p.line(x='time', y='close', source=source, line_width=2)
+    p.line(x="time", y="close", source=source, line_width=2)
     return p
 
 
