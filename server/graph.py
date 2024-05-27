@@ -145,6 +145,7 @@ def build_graph_line(
         interval: str,
         color="standart"
 ):
+    colors = {"standart": "#0000FF", "daltonic": "#000000"}
     data = cur_info.get_history_of_current_currency_by_ticker(
         ticker, start_time, end_time, intervals[interval]
     )
@@ -182,7 +183,7 @@ def build_graph_line(
     p.xaxis.major_label_orientation = pi / 4
     p.grid.grid_line_alpha = 0.3
 
-    p.line(x="time", y="close", source=source, line_width=2)
+    p.line(x='time', y='close', source=source, line_width=2, color=colors[color])
     return p
 
 
