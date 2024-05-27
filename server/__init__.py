@@ -3,6 +3,7 @@ from flask_login import LoginManager
 from db import database
 from parser import parser
 import os
+from server.config import TOKEN, METAL_KEY, EXCHANGE_RATE_KEY
 
 DATABASE = "db/superbirzha.db"
 SECRET_KEY = "KETUNREAL"  # Запилить конфиг-файл надо будет
@@ -12,9 +13,9 @@ CURRENCIES = {
     "CNY": ["CNYRUB_TMS", "Китайский юань", 3],
     "EUR": ["EUR_RUB__TOM", "Eвро", 2],
 }
-token = "t.IEa99GPRoD0m0Z3MH_M2BUMIAVsqYMCpcmJhQFIKDw8rg3tk7CpENgicqyVpOMSTK1ubCt1ZB7SQCXTcEy0Dcw"
-metal_key = "5f266da4bdd540557f1d6c8707360cc8"
-exchange_rate_key = "752cb5b3134f445168799121"
+# token = "t.IEa99GPRoD0m0Z3MH_M2BUMIAVsqYMCpcmJhQFIKDw8rg3tk7CpENgicqyVpOMSTK1ubCt1ZB7SQCXTcEy0Dcw"
+# metal_key = "5f266da4bdd540557f1d6c8707360cc8"
+# exchange_rate_key = "752cb5b3134f445168799121"
 
 app = Flask(__name__)
 app.config.from_object(__name__)
@@ -26,7 +27,7 @@ login_manager.login_view = "get_user_authorization"
 
 
 dbase = database.Database()
-parser_API = parser.CurrencyInfo(token, metal_key, exchange_rate_key)
+parser_API = parser.CurrencyInfo(TOKEN, METAL_KEY, EXCHANGE_RATE_KEY)
 
 from server import models
 from server import views
