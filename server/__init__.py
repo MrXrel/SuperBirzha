@@ -3,19 +3,7 @@ from flask_login import LoginManager
 from db import database
 from parser import parser
 import os
-from server.config import TOKEN, METAL_KEY, EXCHANGE_RATE_KEY
-
-DATABASE = "db/superbirzha.db"
-SECRET_KEY = "KETUNREAL"  # Запилить конфиг-файл надо будет
-CURRENCIES = {
-    "XAU": ["GLDRUB_TOM", "Золото", 4],
-    "USD": ["USD000000TOD", "Доллар США", 1],
-    "CNY": ["CNYRUB_TMS", "Китайский юань", 3],
-    "EUR": ["EUR_RUB__TOM", "Eвро", 2],
-}
-# token = "t.IEa99GPRoD0m0Z3MH_M2BUMIAVsqYMCpcmJhQFIKDw8rg3tk7CpENgicqyVpOMSTK1ubCt1ZB7SQCXTcEy0Dcw"
-# metal_key = "5f266da4bdd540557f1d6c8707360cc8"
-# exchange_rate_key = "752cb5b3134f445168799121"
+from server.config import DATABASE, SECRET_KEY, CURRENCIES, TOKEN, METAL_KEY, EXCHANGE_RATE_KEY
 
 app = Flask(__name__)
 app.config.from_object(__name__)
