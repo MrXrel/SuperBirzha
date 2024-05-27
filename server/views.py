@@ -3,8 +3,7 @@ from server import (
     dbase,
     CURRENCIES,
     parser_API,
-    metal_key,
-    exchange_rate_key,
+    config,
 )
 from flask import (
     render_template,
@@ -99,7 +98,7 @@ def get_currency(currency_id):
     data = models.Currency(
         currency_id, CURRENCIES[currency_id][1], price, price - (price * 0.07)
     )
-    with open("server/templates/about_currencies.json", "r") as js:
+    with open("server/templates/about_currencies.json", "r", encoding="utf8") as js:
         json_dump = json.load(js)
         about = json_dump[currency_id]
     graph = build_graph(
@@ -109,7 +108,12 @@ def get_currency(currency_id):
         end_time=get_start_time(),
         interval="30minutes",
     )
-    script, div = components(graph)
+    print(graph)
+    try:
+        script, div = components(graph)
+    except ValueError:
+        script = 'Проблема на стороне api'
+        div = 'Приносим извинения\n'
 
     return render_template(
         "pettern_currencies.html",
