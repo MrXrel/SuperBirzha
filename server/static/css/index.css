@@ -512,3 +512,11 @@ footer {
   background-color: #0064bd;
   box-shadow: none;
 }
+
+.time_input {
+    display: inline;
+}
+
+.balance_user {
+    font-size: 25px;
+}

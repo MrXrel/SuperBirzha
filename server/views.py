@@ -21,7 +21,7 @@ from .forms.PayMenu import PayDeposit, PayWithdraw
 from .graph import build_graph_candles, get_start_time, build_graph_line
 from flask_login import login_user, current_user, login_required, logout_user
 from werkzeug.security import generate_password_hash, check_password_hash
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta, timezone, time
 from bokeh.embed import components
 import json
 
@@ -291,6 +291,11 @@ def get_private_office():
 @app.post("/private-office")
 @login_required
 def post_private_office():
+    if "time" in request.form:
+        hour, minutes = map(int, request.form["time"].split(":"))
+        dbase.update_time_to_note(
+            current_user.get_id(), time(hour=(hour + 21) % 24, minute=minutes)
+        )
     if "tg_id" in request.form:
         tg_id = request.form["tg_id"]
         count = request.form["count"]

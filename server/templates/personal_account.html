@@ -5,7 +5,7 @@
 {% block sign %}
     <center>
         <div id="persacc">
-            <div><h4>Счёт в Рублях:</h4>{{ user.get_balance()|round(2) }} ₽</div>
+            <div class="balance_user"><h4>Счёт в Рублях:</h4>{{ user.get_balance()|round(2) }} ₽</div>
             <div class="fio_tg_pos">
                 <div><h5><b>{{ user.get_name() }} {{ user.get_surname() }}</b></h5></div>
                 <div class="tg_info">
@@ -16,8 +16,12 @@
                         </form>
                     {% else %}
                         <form method="post">
-                            <input class="input_tg_info" name="tg_id" type="text" placeholder="Телеграмм айди">
-                            <input class="input_tg_info" name="count" type="text" placeholder="Сумма для оповещения">
+                            <input class="input_tg_info" name="tg_id" type="text" placeholder="Телеграмм айди" required minlength="1"/>
+                            <input class="input_tg_info" name="count" type="text" placeholder="Сумма для оповещения" required minlength="1"/>
+                            <div class="time_input">
+                                <label>Время для оповещения</label>
+                                <input name="time" type="time"/>
+                            </div>
                             <button class="button_tg_info" >Отправить</button>
                         </form>
                     {% endif %}
