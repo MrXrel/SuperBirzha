@@ -104,9 +104,9 @@ def get_currency(currency_id):
     graph = build_graph(
         parser_API,
         CURRENCIES[currency_id][0],
-        start_time=get_start_time(hours=59),
+        start_time=get_start_time(hours=24),
         end_time=get_start_time(),
-        interval="1hour",
+        interval="30minutes",
     )
     print(graph)
     try:
@@ -129,7 +129,10 @@ def get_currency(currency_id):
 @login_required
 def post_buy_sell_currency(currency_id):
     data = {}
-    count_currency = float(request.form["count"])
+    count_currency = request.form["count"]
+    if isinstance(count_currency, str):
+        flash("Введите число")
+        return redirect(url_for("get_currency", currency_id=currency_id))
     for cuur in CURRENCIES:
         price = parser_API.get_current_price_by_figi(
             parser_API.get_figi_by_ticker(CURRENCIES[cuur][0])
@@ -141,7 +144,7 @@ def post_buy_sell_currency(currency_id):
             current_user.get_id(),
             CURRENCIES[currency_id][2],
             "BUY",
-            count_currency,
+            float(count_currency),
             get_current_time(),
         )
         if res == 0:
@@ -152,7 +155,7 @@ def post_buy_sell_currency(currency_id):
             current_user.get_id(),
             CURRENCIES[currency_id][2],
             "SELL",
-            count_currency,
+            float(count_currency),
             get_current_time(),
         )
         if res == 0:
@@ -173,7 +176,6 @@ def get_currencies():
         data[cuur] = price
     dbase.update_currency(data)
     for currency in data:
-
         currencies.append(
             models.Currency(
                 currency,

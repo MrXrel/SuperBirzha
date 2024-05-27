@@ -328,7 +328,6 @@ footer {
 
 .dropdownSS {
     float: right;
-    overflow: hidden;
 }
 
 .dropdownSS .dropbtnSS {
@@ -336,10 +335,8 @@ footer {
     border: none;
     outline: none;
     color: white;
-    padding: 14px 16px;
     background-color: inherit;
     font-family: inherit;
-    margin: 0;
 }
 
 .dropdown-contentSS {
@@ -368,9 +365,6 @@ footer {
     display: block;
 }
 
-.dropdownSS:hover .dropbtnSS {
-    background-color: #1f5bc2;
-}
 
 .buy {
     color: #fc0c0c;
@@ -421,6 +415,11 @@ footer {
     align-items: stretch;
 }
 
+.graph_settings_button {
+    border: #858585 solid;
+    border-radius: 3px;
+}
+
 .graph {
     display: inline-block;
 }
@@ -432,4 +431,10 @@ footer {
     background-color: #fff;
     border-radius: 10px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.menu_right {
+    float: right;
+    text-align: center;
+    font-size: 16px;
 }

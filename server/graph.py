@@ -43,11 +43,8 @@ def build_graph(
     data = cur_info.get_history_of_current_currency_by_ticker(
         ticker, start_time, end_time, intervals[interval]
     )
-    pprint.pprint(data)
     data = {i: data[i] for i in range(len(data))}
-    print(data)
     data = pd.DataFrame.from_dict(data, orient="index")
-    print(data)
     try:
         inc = data["close"] > data["open"]
         dec = data["open"] > data["close"]

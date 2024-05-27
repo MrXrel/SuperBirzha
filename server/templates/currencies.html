@@ -10,9 +10,7 @@
                     <tr>
                         <th scope="col">Название</th>
                         <th scope="col">Покупка</th>
-                        <th scope="col">Покупка изменение</th>
                         <th scope="col">Продажа</th>
-                        <th scope="col">Продажа изменение</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -20,9 +18,7 @@
                     <tr>
                         <th scope="row"><div id="front">{{curr.ru_name }}</div><a href="{{url_for('get_currency', currency_id=curr.id)}}" class="color-change-link">{{curr.id}}</a></th>
                             <td><span>{{ curr.buy_price|round(2) }}</span> ₽</td>
-                            <td><span>0</span> %</td>
                             <td><span>{{ curr.sell_price|round(2) }}</span> ₽</td>
-                            <td><span>0</span> %</td>
                     </tr>
                     {% endfor %}
                 </tbody>

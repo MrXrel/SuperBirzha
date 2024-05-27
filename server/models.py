@@ -13,7 +13,10 @@ class User:
 
 class UserLogin(UserMixin):
     def fromDB(self, user_id, dbase):
+        print(user_id)
         self.__user = dbase.get_user_data_by_id(user_id)
+        if self.__user == 0:
+            self.__user = dbase.get_user_data_by_id(1)
         return self
 
     def create(self, user):
