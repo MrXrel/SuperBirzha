@@ -6,9 +6,9 @@
     <center>
         <div id="persacc">
 
-            <div><h4>Счёт в Рублях:</h4>100 000 ₽</div>
-            <div><h5><b>Иванов Иван Иванович</b></h5>
-                <div><a href="#"><em>Выход</em></a></div>
+            <div><h4>Счёт в Рублях:</h4>{{ user.get_balance() }} ₽</div>
+            <div><h5><b>{{ user.get_name() }} {{ user.get_surname() }}</b></h5>
+                <div><a href=" {{url_for('user_logout')}}"><em>Выход</em></a></div>
             </div>
       
         </div>
@@ -23,7 +23,7 @@
                 </thead>
                 <tbody>
                     <tr>
-                        <th scope="row"><div id="front">Валюта</div><a href="#" class="color-change-link">Код волюты</a></th>
+                        <th scope="row"><div id="front">Валюта</div><a href="#" class="color-change-link">Код валюты</a></th>
                         <td><span>0</span> $</td>
                         <td><div><span>0</span> ₽</div> 
                         <div id="back">0 %</div></td>
