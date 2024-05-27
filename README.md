@@ -42,7 +42,7 @@
 git clone https://github.com/yourusername/superbirzha.git
 ```
 2. Перейдите в папку с репозиторием
-`cd superbirzha`
+`cd SuperBirzha`
 3. Установка всех зависимостей проекта
 `pip install -r requirements.txt`
 
