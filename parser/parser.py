@@ -1,5 +1,5 @@
 from typing import List, Optional, Dict
-from tinkoff.invest import InstrumentIdType, InstrumentStatus, CandleInterval, Client, HistoricCandle
+from tinkoff.invest import InstrumentIdType, InstrumentStatus, CandleInterval, Client, HistoricCandle, Quotation
 from pandas import DataFrame
 import pandas as pd
 import config
@@ -19,31 +19,35 @@ all_figi = {
     ('euro', 'EUR'): 'BBG0013HJJ31'
 }
 
+
 class CurrencyInfo:
-    '''
-    Класс для работы с информацией о валютах через API Tinkoff Invest.
-
-    Предоставляет методы для получения информации о валютах, включая их историю цен, а так же получение
-    полного перечня информации о каждой валюте. Используется токен для аутентификации на API Tinkoff Invest.
-    '''
-
     def __init__(self, token: str) -> None:
         """
         Инициализация класса с токеном для аутентификации на API Tinkoff Invest.
 
-        :param token: Токен для аутентификации на API Tinkoff Invest.
+        Parameters
+        ----------
+        token : str
+            Токен для аутентификации на API Tinkoff Invest.
         """
         self.token = config.token
         self.api_exchange_rate_key = config.exchange_rate_key
 
     def get_exchange_rate_of_currency(self, base_currency: str, target_currency: str) -> float:
         """
-        :param base_currency: валюта, для которой требуется получить курс обмена.
-        :type base_currency: str
-        :param target_currency: валюта, курс обмена которой требуется получить.
-        :type target_currency: str
-        :return: Курс обмена между двумя валютами
-        :rtype: float
+        Получение курса обмена между двумя валютами.
+
+        Parameters
+        ----------
+        base_currency : str
+            Валюта, для которой требуется получить курс обмена.
+        target_currency : str
+            Валюта, курс обмена которой требуется получить.
+
+        Returns
+        ----------
+        float
+            Курс обмена между двумя валютами.
         """
         url = f"https://v6.exchangerate-api.com/v6/{self.api_exchange_rate_key}/latest/{base_currency}"
         response = requests.get(url)
@@ -62,40 +66,60 @@ class CurrencyInfo:
         Returns
         -------
         float
-            Последняя цена металла.
+            Последняя цена металла или 0 в случае ошибки
         """
-        data = self.get_history_of_current_currency_by_figi('BBG000VJ5YR4',
-                                                            datetime.utcnow() - timedelta(days=1), datetime.utcnow(),
-                                                            interval=CandleInterval.CANDLE_INTERVAL_5_MIN)
-        if data:
-            return data[-1]["open"]
+        try:
+            data = self.get_history_of_current_currency_by_figi('BBG000VJ5YR4',
+                                                                datetime.utcnow() - timedelta(days=1),
+                                                                datetime.utcnow(),
+                                                                interval=CandleInterval.CANDLE_INTERVAL_5_MIN)
+            if data:
+                return data[-1]["open"]
+        except:
+            return 0
 
     def is_metal(self, figi: str) -> bool:
         """
-        Проверяет, является ли валюта\металл металлом.
-        :rtype: bool
+        Проверяет, является ли валюта/металл металлом.
+
+        Parameters
+        ----------
+        figi : str
+            FIGI идентификатор валюты/метала.
+
+        Returns
+        ----------
+        bool
+            True, если валюта/металл определена как металл, в противном случае False.
         """
         return figi == 'BBG000VJ5YR4'
 
-    def create_data_frame(self, instrument: List[dict]) -> DataFrame:
+    def create_data_frame(self, instrument: List[str]) -> DataFrame:
         """
-        Создание DataFrame из списка инструментов для удобства работы с данными.
+        Создает DataFrame из списка инструментов для удобства работы с данными.
 
-        :param instrument: Список инструментов (валют).
-        :type instrument: list
-        :return: DataFrame с информацией о валютах.
-        :rtype: pandas.DataFrame
+        Parameters
+        ----------
+        instrument : list
+            Список инструментов (валют).
+
+        Returns
+        ----------
+        pandas.DataFrame
+            DataFrame с информацией о валютах.
         """
-
         data_frame = DataFrame(instrument, columns=['ticker', 'figi', 'name', 'nominal'])
         pd.set_option('display.max_rows', 20)
         return data_frame
 
-    def get_all_currencies(self) -> Optional[List[str]]:
+    def get_all_currencies(self) -> Optional[pd.DataFrame]:
         """
-        Получение списка всех доступных валют через API Tinkoff Invest.
+        Извлекает список всех доступных валют через API Tinkoff Invest.
 
-        :return: Список всех валют или сообщение об ошибке, если произошла ошибка.
+        Returns
+        ----------
+        Optional[pandas.DataFrame]
+            DataFrame с информацией обо всех валютах или сообщение об ошибке, если произошла ошибка.
         """
         all_currencies = None
         with Client(self.token) as client:
@@ -104,13 +128,16 @@ class CurrencyInfo:
                     instrument_status=InstrumentStatus.INSTRUMENT_STATUS_ALL).instruments
                 return self.create_data_frame(all_currencies)
             except Exception as e:
-                return f"In function get_all_currencies \n {e}"
+                return f"В функции get_all_currencies \n {e}"
 
-    def get_all_shares(self) -> Optional[List[str]]:
+    def get_all_shares(self) -> pd.DataFrame:
         """
-        Получение списка всех доступных валют через API Tinkoff Invest.
+        Извлекает список всех доступных акций через API Tinkoff Invest.
 
-        :return: Список всех валют или сообщение об ошибке, если произошла ошибка.
+        Returns
+        ----------
+        Optional[pandas.DataFrame]
+            DataFrame с информацией обо всех акциях или сообщение об ошибке, если произошла ошибка.
         """
         all_currencies = None
         with Client(self.token) as client:
@@ -119,17 +146,22 @@ class CurrencyInfo:
                     instrument_status=InstrumentStatus.INSTRUMENT_STATUS_ALL).instruments
                 return self.create_data_frame(all_currencies)
             except Exception as e:
-                return f"In function get_all_currencies \n {e}"
+                return f"В функции get_all_shares \n {e}"
 
     def get_figi_by_ticker(self, ticker: str) -> Optional[str]:
         """
-        Получение FIGI валюты по ее тикеру.
+        Получение FIGI валюты по её тикеру.
 
-        :param ticker: Тикер валюты.
-        :type ticker: str
-        :return: FIGI валюты или сообщение об ошибке, если произошла ошибка.
+        Parameters
+        ----------
+        ticker : str
+            Тикер валюты.
+
+        Returns
+        ----------
+        Optional[str]
+            FIGI валюты или сообщение об ошибке, если произошла ошибка.
         """
-
         with Client(self.token) as client:
             try:
                 data = self.get_all_currencies()
@@ -141,15 +173,21 @@ class CurrencyInfo:
                     figi = filtered_data['figi'].iloc[0]
                     return figi
             except Exception as e:
-                return f"In function get_figi_by_ticker \n {e}"
+                return f"В функции get_figi_by_ticker \n {e}"
 
     def get_ticker_by_figi(self, figi: str):
         """
-        Получение тикера валюты по ее FIGI.
+        Получение тикера валюты по её FIGI.
 
-        :param figi: FIGI валюты.
-        :type figi: str
-        :return: тикер валюты
+        Parameters
+        ----------
+        figi : str
+            FIGI валюты.
+
+        Returns
+        ----------
+        str
+            Тикер валюты.
         """
         for key, value in all_figi.items():
             if value == figi:
@@ -158,13 +196,18 @@ class CurrencyInfo:
 
     def get_info_about_currency_by_ticker(self, ticker: str) -> Optional[dict]:
         """
-        Получение информации о валюте по ее тикеру.
+        Получение информации о валюте по её тикеру.
 
-        :param ticker: Тикер валюты.
-        :type ticker: str
-        :return: Информация о валюте или сообщение об ошибке, если произошла ошибка.
+        Parameters
+        ----------
+        ticker : str
+            Тикер валюты.
+
+        Returns
+        ----------
+        Optional[dict]
+            Информация о валюте или сообщение об ошибке, если произошла ошибка.
         """
-
         with Client(self.token) as client:
             try:
                 figi = self.get_figi_by_ticker(ticker)
@@ -172,32 +215,43 @@ class CurrencyInfo:
                                                             id_type=InstrumentIdType.INSTRUMENT_ID_TYPE_FIGI).instrument
                 return instrument
             except Exception as e:
-                return f"In function get_info_about_currency_by_ticker \n {e}"
+                return f"В функции get_info_about_currency_by_ticker \n {e}"
 
     def get_info_about_currency_by_figi(self, figi: str) -> Optional[dict]:
         """
-        Получение информации о валюте по ее FIGI.
+        Получение информации о валюте по её FIGI.
 
-        :param figi: FIGI валюты.
-        :type figi: str
-        :return: Информация о валюте или сообщение об ошибке, если произошла ошибка.
+        Parameters
+        ----------
+        figi : str
+            FIGI валюты.
+
+        Returns
+        ----------
+        Optional[dict]
+            Информация о валюте или сообщение об ошибке, если произошла ошибка.
         """
-
         with Client(self.token) as client:
             try:
                 instrument = client.instruments.currency_by(id=figi,
                                                             id_type=InstrumentIdType.INSTRUMENT_ID_TYPE_FIGI).instrument
                 return instrument
             except Exception as e:
-                return f"In function get_info_about_currency_by_figi \n {e}"
+                return f"В функции get_info_about_currency_by_figi \n {e}"
 
     def get_current_price_by_figi(self, figi: str) -> float:
         """
         Получение текущей цены валюты по FIGI.
 
-        :param figi: FIGI инструмента.
-        :type figi: str
-        :return: Текущая цена валюты в рублях.
+        Parameters
+        ----------
+        figi : str
+            FIGI инструмента.
+
+        Returns
+        ----------
+        float
+            Текущая цена валюты в рублях.
         """
         with Client(self.token) as client:
             instrument = client.instruments.currency_by(id=figi,
@@ -211,16 +265,22 @@ class CurrencyInfo:
             price_in_rubles = price_based_currency * rate
             return price_in_rubles
 
-    def get_current_price_by_ticker(self, ticker: str):
+    def get_current_price_by_ticker(self, ticker: str) -> float:
         """
         Получение текущей цены валюты по тикеру.
 
-        :param ticker: Тикер инструмента.
-        :type ticker: str
-        :return: Текущая цена валюты в рублях.
+        Parameters
+        ----------
+        ticker : str
+            Тикер инструмента.
+
+        Returns
+        ----------
+        float
+            Текущая цена валюты в рублях.
         """
         with Client(self.token) as client:
-            figi = self.get_figi_by_ticker()
+            figi = self.get_figi_by_ticker(ticker)
             instrument = client.instruments.currency_by(id=figi,
                                                         id_type=InstrumentIdType.INSTRUMENT_ID_TYPE_FIGI).instrument
             ticker = self.get_ticker_by_figi(figi)
@@ -236,8 +296,10 @@ class CurrencyInfo:
         """
         Получение всех текущих цен валют по их FIGI.
 
-        :return: Словарь, где ключи - названия валют, а значения - их текущие цены в рублях.
-        :rtype: Dict[str, float]
+        Returns
+        ----------
+        Dict[str, float]
+            Словарь, где ключи - названия валют, а значения - их текущие цены в рублях.
         """
         data_of_prices = {}
         with Client(self.token) as client:
@@ -249,19 +311,24 @@ class CurrencyInfo:
                                                   interval: CandleInterval = CandleInterval.CANDLE_INTERVAL_HOUR) -> \
             List[dict]:
         """
-        Получение истории цен текущей валюты по ее тикеру.
+        Получение истории цен текущей валюты по её тикеру.
 
-        :param ticker: Тикер валюты.
-        :type ticker: str
-        :param start_time: Начальное время для запроса истории цен.
-        :type start_time: datetime
-        :param end_time: Конечное время для запроса истории цен.
-        :type end_time: datetime
-        :param interval: Интервал времени для запроса истории цен.
-        :type interval: CandleInterval
-        :return: История цен валюты или сообщение об ошибке, если произошла ошибка.
+        Parameters
+        ----------
+        ticker : str
+            Тикер валюты.
+        start_time : datetime
+            Начальное время для запроса истории цен.
+        end_time : datetime
+            Конечное время для запроса истории цен.
+        interval : CandleInterval, optional
+            Интервал времени для запроса истории цен, по умолчанию CANDLE_INTERVAL_HOUR.
+
+        Returns
+        ----------
+        List[dict]
+            История цен валюты или сообщение об ошибке, если произошла ошибка.
         """
-
         figi = self.get_figi_by_ticker(ticker)
         with Client(self.token) as client:
             try:
@@ -275,25 +342,30 @@ class CurrencyInfo:
                 data_list = self.create_data_list(candles)
                 return data_list
             except Exception as e:
-                return f"In function get_history_of_current_currency_by_ticker \n {e}"
+                return f"В функции get_history_of_current_currency_by_ticker \n {e}"
 
     def get_history_of_current_currency_by_figi(self, figi: str, start_time: datetime, end_time: datetime,
                                                 interval: CandleInterval = CandleInterval.CANDLE_INTERVAL_HOUR) -> List[
         dict]:
         """
-        Получение истории цен текущей акции по ее FIGI.
+        Получение истории цен текущей акции по её FIGI.
 
-        :param figi: FIGI акции.
-        :type figi: str
-        :param start_time: Начальное время для запроса истории цен.
-        :type start_time: datetime
-        :param end_time: Конечное время для запроса истории цен.
-        :type end_time: datetime
-        :param interval: Интервал времени для запроса истории цен.
-        :type interval: CandleInterval
-        :return: История цен акции или сообщение об ошибке, если произошла ошибка.
+        Parameters
+        ----------
+        figi : str
+            FIGI акции.
+        start_time : datetime
+            Начальное время для запроса истории цен.
+        end_time : datetime
+            Конечное время для запроса истории цен.
+        interval : CandleInterval, optional
+            Интервал времени для запроса истории цен, по умолчанию CANDLE_INTERVAL_HOUR.
+
+        Returns
+        ----------
+        List[dict]
+            История цен акции или сообщение об ошибке, если произошла ошибка.
         """
-
         with Client(self.token) as client:
             try:
                 instrument = client.market_data.get_candles(
@@ -306,16 +378,21 @@ class CurrencyInfo:
                 data_list = self.create_data_list(candles)
                 return data_list
             except Exception as e:
-                return f"In function get_history_of_current_share_by_figi \n {e}"
+                return f"В функции get_history_of_current_currency_by_figi \n {e}"
 
     def create_data_list(self, candles: List[HistoricCandle]) -> List[dict]:
         """
         Создание списка данных из истории цен.
 
-        :param candles: Список исторических свечей.
-        :type candles: list
-        :return: Список данных о ценах.
-        :rtype: list
+        Parameters
+        ----------
+        candles : list
+            Список исторических свечей.
+
+        Returns
+        ----------
+        list
+            Список данных о ценах.
         """
         data_list = [{
             'time': current.time,
@@ -328,22 +405,20 @@ class CurrencyInfo:
 
         return data_list
 
-    def convert_to_rubles(self, current_candle: HistoricCandle) -> float:
+    def convert_to_rubles(self, current_candle: Quotation) -> float:
         """
         Конвертация цены валюты в рубли.
 
-        :param current_candle: Объект с информацией о цене валюты.
-        :type current_candle: HistoricCandle
-        :return: Цена валюты в рублях.
-        :rtype: float
+        Parameters
+        ----------
+        current_candle : HistoricCandle
+            Объект с информацией о цене валюты.
+
+        Returns
+        ----------
+        float
+            Цена валюты в рублях.
         """
+        return current_candle.units + current_candle.nano / 1e9  # nano - 9 нулей
 
-        return current_candle.units + current_candle.nano / 1e9  # nano - 9 zeroes
 
-
-if __name__ == '__main__':
-    currency_info = CurrencyInfo(config.token)
-    # print(currency_info.get_all_currencies())
-    # print(currency_info.get_all_shares())
-    # print(currency_info.get_current_price_by_figi('TCS3013HRTL0'))
-    print(currency_info.get_all_prices())
