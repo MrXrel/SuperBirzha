@@ -6,9 +6,8 @@
     <center>
         <div id="persacc">
 
-            <div><h4>Счёт в Рублях:</h4>{{ user.get_balance() }} ₽</div>
+            <div><h4>Счёт в Рублях:</h4>{{ user.get_balance()|round(2) }} ₽</div>
             <div><h5><b>{{ user.get_name() }} {{ user.get_surname() }}</b></h5>
-                <div><a href=" {{url_for('user_logout')}}"><em>Выход</em></a></div>
             </div>
       
         </div>
@@ -22,12 +21,17 @@
                     </tr>
                 </thead>
                 <tbody>
+                    {% for case in data %}
+                    {% if data[case]["quantity"] > 0 %}
                     <tr>
-                        <th scope="row"><div id="front">Валюта</div><a href="#" class="color-change-link">Код валюты</a></th>
-                        <td><span>0</span> $</td>
-                        <td><div><span>0</span> ₽</div> 
-                        <div id="back">0 %</div></td>
+                        <th scope="row"><div id="front">{{ data[case]["name_currency"] }}</div><a href="{{url_for('get_currency', currency_id=case)}}" class="color-change-link">{{ case }}</a></th>
+                        <td><span>{{ data[case]["quantity"] }}</span></td>
+                        <td><div><span>{{ data[case]["selling_amount"]|round(2) }}</span> ₽</div> 
+                        <div id="back">{{ data[case]["profitability"]|round(4)}} %</div></td>
                     </tr>
+                    {% endif %}
+                    {% endfor %}
+                    
                 </tbody>
             </table>
         </div>

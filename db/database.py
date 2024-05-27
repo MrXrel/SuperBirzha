@@ -1,5 +1,6 @@
 from sqlalchemy import *
 from datetime import time, datetime
+from sqlalchemy.exc import DBAPIError
 
 
 class Database:
@@ -60,15 +61,16 @@ class Database:
             "Notifier_bot",
             self.metadata,
             Column("ID", ForeignKey("Users.ID"), primary_key=True),
+            Column("name", String(200), nullable=False),
             Column("tg_id", Integer(), default=0),
             Column("old_briefcase", Float(), default=0),
             Column("new_briefcase", Float(), default=0),
             Column("delta_to_note", Float(), default=100),
             Column("time_to_note", Time(), default=time(hour=10, minute=0)),
-            Column("already_notified", Boolean(), default=False),
         )
         self.tg_bot_keys = (
             "ID",
+            "name",
             "tg_id",
             "old_briefcase",
             "new_briefcase",
@@ -84,7 +86,7 @@ class Database:
             Column("currency_id", ForeignKey("Currency.ID")),
             Column("quantity", Float(), default=0),
         )
-        self.list_of_currencies = ["dollar", "euro", "yuan", "gold"]
+        self.list_of_currencies = ["USD", "EUR", "CNY", "XAU"]
         self.metadata.create_all(self.engine)
         self.lastID = len(self.conn.execute(select(self.users)).fetchall())
         for i in self.list_of_currencies:
@@ -119,11 +121,13 @@ class Database:
                         user_id=r.inserted_primary_key[0], currency_id=i
                     )
                 )
-            self.conn.execute(insert(self.tg_bot).values(ID=r.inserted_primary_key[0]))
+            self.conn.execute(
+                insert(self.tg_bot).values(ID=r.inserted_primary_key[0], name=name)
+            )
             self.lastID = r.inserted_primary_key[0]
-            return r.inserted_primary_key[0]
-        except Exception:
+        except DBAPIError:
             return 0
+        return r.inserted_primary_key[0]
 
     def add_currency(self, price: float, name: str) -> int:
         """
@@ -180,11 +184,13 @@ class Database:
         dict
             словарь с полями 'ID', 'email', 'password', 'surname', 'name', 'balance', 'time_to_note'
         """
-
-        s = select(self.users).where(self.users.c.email == email)
-        r = self.conn.execute(s)
-        p = r.fetchall()[0]
-        return {key: value for key, value in zip(self.user_keys, p)}
+        try:
+            s = select(self.users).where(self.users.c.email == email)
+            r = self.conn.execute(s)
+            p = r.fetchall()[0]
+            return {key: value for key, value in zip(self.user_keys, p)}
+        except Exception:
+            return 0
 
     def get_operation_data_by_id(self, operation_id: int) -> dict:
         """
@@ -266,11 +272,36 @@ class Database:
         -------
         int
             id выполненной операции
+            0, если недостаточно средств
         """
 
         price = self.conn.execute(
             select(self.currency.c.price).where(self.currency.c.ID == currency_id)
         ).fetchall()[0][0]
+
+        # изменение баланса в Users
+        old_balance = self.conn.execute(
+            select(self.users.c.balance).where(self.users.c.ID == user_id)
+        ).fetchall()[0][0]
+
+        # изменение количества в Briefcase
+        old_quantity = self.conn.execute(
+            select(self.briefcase.c.quantity).where(
+                self.briefcase.c.user_id == user_id,
+                self.briefcase.c.currency_id == currency_id,
+            )
+        ).fetchall()[0][0]
+
+        k = 0
+        if type_of_operation == "SELL":
+            print(old_quantity - quantity)
+            if old_quantity - quantity < 0:
+                return 0  # недостаточно валюты
+            k = 1
+        elif type_of_operation == "BUY":
+            if old_balance < price * quantity:
+                return 0  # недостаточно средств
+            k = -1
 
         # вставка записи в Operations
         ins = insert(self.operations).values(
@@ -284,29 +315,11 @@ class Database:
 
         r = self.conn.execute(ins)
 
-        # изменение баланса в Users
-        old_balance = self.conn.execute(
-            select(self.users.c.balance).where(self.users.c.ID == user_id)
-        ).fetchall()[0][0]
-
-        k = 0
-        if type_of_operation == "SELL":
-            k = 1
-        elif type_of_operation == "BUY":
-            k = -1
         self.conn.execute(
             update(self.users)
             .where(self.users.c.ID == user_id)
             .values(balance=old_balance + price * quantity * k)
         )
-
-        # изменение количества в Briefcase
-        old_quantity = self.conn.execute(
-            select(self.briefcase.c.quantity).where(
-                self.briefcase.c.user_id == user_id,
-                self.briefcase.c.currency_id == currency_id,
-            )
-        ).fetchall()[0][0]
 
         self.conn.execute(
             update(self.briefcase)
@@ -352,6 +365,7 @@ class Database:
         -------
         int
             id выполненной операции
+            0, если недостаточно средств
         """
         old_balance = self.conn.execute(
             select(self.users.c.balance).where(self.users.c.ID == user_id)
@@ -372,6 +386,8 @@ class Database:
         if type_of_operation == "DEPOSIT":
             k = 1
         elif type_of_operation == "WITHDRAW":
+            if old_balance < quantity:
+                return 0  # недостаточно средств
             k = -1
         self.conn.execute(
             update(self.users)
@@ -525,11 +541,14 @@ class Database:
         }
 
         for row in all_operations.fetchall():
-            currency_name = self.conn.execute(
-                select(self.currency.c.currency_name).where(
-                    self.currency.c.ID == row[2]
-                )
-            ).fetchall()[0][0]
+            try:
+                currency_name = self.conn.execute(
+                    select(self.currency.c.currency_name).where(
+                        self.currency.c.ID == row[2]
+                    )
+                ).fetchall()[0][0]
+            except Exception:
+                pass
             if row[5] == "BUY":
                 d[currency_name]["purchase_amount"] += row[4] * row[3]
             elif row[5] == "SELL":
@@ -612,5 +631,27 @@ class Database:
         self.conn.execute(
             update(self.tg_bot)
             .where(self.tg_bot.c.ID == user_id)
-            .values(time_to_note=new_delta)
+            .values(delta_to_note=new_delta)
         )
+
+    def update_old_briefcase_by_id(self, user_id: int):
+        """
+        Приравнивает old_briefcase к new_briefcase
+
+        Parameters
+        ----------
+        user_id: int
+        """
+        new_old_briefcase = self.conn.execute(
+            select(self.tg_bot.c.new_briefcase).where(self.tg_bot.c.ID == user_id)
+        ).fetchall()[0][0]
+        self.conn.execute(
+            update(self.tg_bot)
+            .where(self.tg_bot.c.ID == user_id)
+            .values(old_briefcase=new_old_briefcase)
+        )
+
+
+if __name__ == "__main__":
+    dbase = Database()
+    print(dbase.create_user("d@mai.com", "123", "ово", ",бобо"))
