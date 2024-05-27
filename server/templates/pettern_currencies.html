@@ -36,10 +36,14 @@
                 {{ the_script|safe }}
             </div>
             <div class="graph_settigns">
-                <button>Дата1</button>
-                <button>Дата2</button>
-                <button>Дата3</button>
-                <button>Дата4</button>
+                <form method="post">
+                    <button class="graph_settings_button" name="1h">Час</button>
+                    <button class="graph_settings_button" name="3h">3 часа</button>
+                    <button class="graph_settings_button" name="1d">День</button>
+                    <button class="graph_settings_button" name="7d">Неделя</button>
+                    <button class="graph_settings_button" name="1mon">Месяц</button>
+                    <button class="graph_settings_button" name="1year">Год</button>
+                </form>
             </div>
         </div>
     <center>
