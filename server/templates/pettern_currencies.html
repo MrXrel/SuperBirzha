@@ -1,6 +1,6 @@
 {% extends 'layout.html' %}
 
-{% block title %}...{% endblock %} <!-- Тут напишешь выбранную валюту-->
+{% block title %}{{curr.ru_name}}{% endblock %} <!-- Тут напишешь выбранную валюту-->
 
 {% block sign %}
     <center>
@@ -9,17 +9,40 @@
                 <div id="currencies"><h2><b>{{curr.ru_name}}</b></h2></div>
                 <div id="code"><h5>{{curr.id}}</h5></div>
             </center>
-            <div><h3>{{curr.buy_price}} ₽</h3></div>
+            <div><h3>{{curr.buy_price|round(2)}} ₽</h3></div>
             <div class="buysell_position">
-                <button class="button_to_buy">
+            <form method="post">
+                {% for msg in get_flashed_messages() %}
+                <div class="error_box">
+                    {{msg}}
+                </div>
+                {% endfor %}
+                <div class="input_count">
+                    <input class="input_count" type="text" name="count" placeholder="Количество валюты" required minlength="1"/>
+                </div>
+                <button class="button_to_buy" name="submit_buy">
                     <h5 style="color: white;">Купить</h5>
                 </button>
-                <button class="button_to_sell">
+                <button class="button_to_sell" name="submit_sell">
                     <h5 style="color: white;">Продать</h5>
                 </button>
+            </form>
             </div>
         </div>
-        <div class="contain"><p>Тут вставить график</p></div>
+    </center>
+        <div class="graph_contain">
+            <div class="graph">
+                {{ the_div|safe }}
+                {{ the_script|safe }}
+            </div>
+            <div class="graph_settigns">
+                <button>Дата1</button>
+                <button>Дата2</button>
+                <button>Дата3</button>
+                <button>Дата4</button>
+            </div>
+        </div>
+    <center>
         <div id="aboutcurrencies">
             <div><h2><b>О Валюте</b></h2>
                 <div>
@@ -29,4 +52,7 @@
             </div>
         </div>
     </center>
+                
+        
+    
 {% endblock %}
