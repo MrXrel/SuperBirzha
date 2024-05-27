@@ -29,7 +29,8 @@
 ## Установка
 1. Клонирование репозитория:
 ```bash
-git clone https://github.com/yourusername/yourproject.git```
+git clone https://github.com/yourusername/yourproject.git
+```
 2. Установка всех зависимостей проекта
 `pip install -r requirements.txt`
 
