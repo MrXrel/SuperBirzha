@@ -54,20 +54,23 @@ class CurrencyInfo:
 
     def get_exchange_rate_of_metal(self) -> float:
         """
-        Получает курс золота к рублю с помощью Metals API.
+        Получение текущего курса металла.
 
-        :return: Курс золота к рублю.
-        :rtype: float
+
+        Parameters
+        ----------
+        self
+
+        Returns
+        -------
+        float
+            Последняя цена металла.
         """
-        base_currency = 'XAU'
-        target_currency = "RUB"
-        url = f"https://api.metalpriceapi.com/v1/latest?api_key={self.api_metal_key}&base={base_currency}&currencies={target_currency}"
-        response = requests.get(url)
-        data = response.json()
-
-        rates = data["rates"]['RUB']
-
-        return rates
+        data = self.get_history_of_current_currency_by_figi('BBG000VJ5YR4',
+                                                            datetime.utcnow() - timedelta(days=1), datetime.utcnow(),
+                                                            interval=CandleInterval.CANDLE_INTERVAL_5_MIN)
+        if data:
+            return data[-1]["open"]
 
     def is_metal(self, figi: str) -> bool:
         """
@@ -219,11 +222,14 @@ class CurrencyInfo:
         :return: Текущая цена валюты в рублях.
         """
         with Client(self.token) as client:
-            figi = self.get_figi_by_ticker(ticker)
+            figi = self.get_figi_by_ticker()
             instrument = client.instruments.currency_by(id=figi,
                                                         id_type=InstrumentIdType.INSTRUMENT_ID_TYPE_FIGI).instrument
             ticker = self.get_ticker_by_figi(figi)
-            rate = self.get_exchange_rate_of_currency(ticker, 'RUB')
+            if not (self.is_metal(figi)):
+                rate = self.get_exchange_rate_of_currency(ticker, 'RUB')
+            else:
+                rate = self.get_exchange_rate_of_metal()
             price_based_currency = instrument.nominal.units + instrument.nominal.nano / 1e9
             price_in_rubles = price_based_currency * rate
             return price_in_rubles
