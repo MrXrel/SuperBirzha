@@ -43,9 +43,10 @@ async def scheduled_message():
             try:
                 dbase.update_old_briefcase_by_id(user['ID'])
                 await bot.send_message(chat_id=user['tg_id'],
-                                   text=f"{html.bold(user['name'].capitalize())}, стоимость Вашего портфеля изменилась больше, чем вы указывали.\nИзменение портфеля: {html.bold(user['new_briefcase'] - user['old_briefcase'])}")
+                                       text=f"{html.bold(user['name'].capitalize())}, стоимость Вашего портфеля изменилась больше, чем вы указывали.\nИзменение портфеля: {html.bold(user['new_briefcase'] - user['old_briefcase'])}")
             except Exception:
                 pass
+
 
 async def main() -> None:
     global bot
