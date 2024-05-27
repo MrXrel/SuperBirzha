@@ -3,8 +3,7 @@ from server import (
     dbase,
     CURRENCIES,
     parser_API,
-    metal_key,
-    exchange_rate_key,
+    config,
 )
 from flask import (
     render_template,
