@@ -18,7 +18,7 @@ from server import models, login_manager
 from .forms.Registration import RegistrationForm
 from .forms.Login import LoginForm
 from .forms.PayMenu import PayDeposit, PayWithdraw
-from .graph import build_graph, get_start_time
+from .graph import build_graph_candles, get_start_time
 from flask_login import login_user, current_user, login_required, logout_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime, timedelta, timezone
@@ -99,8 +99,8 @@ def get_history():
 
 
 # Страница отдельной валюты
-@app.get("/currency/<currency_id>/<time>")
-def get_currency(currency_id, time="1h"):
+@app.get("/currency/<currency_id>/<time>/<type>")
+def get_currency(currency_id, time="1h", type="lines"):
     price = price = parser_API.get_current_price_by_figi(
         parser_API.get_figi_by_ticker(CURRENCIES[currency_id][0])
     )
@@ -111,7 +111,7 @@ def get_currency(currency_id, time="1h"):
         json_dump = json.load(js)
         about = json_dump[currency_id]
 
-    graph = build_graph(
+    graph = build_graph_candles(
         parser_API,
         CURRENCIES[currency_id][0],
         start_time=get_start_time(hours=times_for_graphs[time][0]),
@@ -134,11 +134,12 @@ def get_currency(currency_id, time="1h"):
 
 
 # Покупка/продажа валюты
-@app.post("/currency/<currency_id>/<time>")
+@app.post("/currency/<currency_id>/<time>/<type>")
 @login_required
-def post_buy_sell_currency(currency_id, time="1h"):
+def post_buy_sell_currency(currency_id, time="1h", type="lines"):
     data = {}
-
+    if "type" in request.form:
+        type = request.form["type"]
     if "time" in request.form:
         time = request.form["time"]
     if "count" in request.form:
@@ -147,7 +148,9 @@ def post_buy_sell_currency(currency_id, time="1h"):
             count_currency = float(count_currency)
         except ValueError:
             flash("Введите число")
-            return redirect(url_for("get_currency", currency_id=currency_id, time=time))
+            return redirect(
+                url_for("get_currency", currency_id=currency_id, time=time, type=type)
+            )
     else:
         return redirect(url_for("get_currency", currency_id=currency_id, time=time))
 
