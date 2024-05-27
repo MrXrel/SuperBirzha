@@ -1,3 +1,4 @@
+import bokeh.plotting
 import pandas as pd
 from math import pi
 from datetime import datetime, timedelta, timezone
@@ -39,7 +40,10 @@ def build_graph_candles(
         end_time: datetime,
         interval: str,
         color="standart"
-):
+) -> bokeh.plotting.figure:
+    """
+    Строит график в виде свеч
+    """
     data = cur_info.get_history_of_current_currency_by_ticker(
         ticker, start_time, end_time, intervals[interval]
     )
@@ -144,7 +148,10 @@ def build_graph_line(
         end_time: datetime,
         interval: str,
         color="standart"
-):
+) -> bokeh.plotting.figure:
+    """
+    Строит граф в виде линии
+    """
     colors = {"standart": "#0000FF", "daltonic": "#000000"}
     data = cur_info.get_history_of_current_currency_by_ticker(
         ticker, start_time, end_time, intervals[interval]
@@ -188,25 +195,10 @@ def build_graph_line(
 
 
 def get_start_time(hours=0, days=0, weeks=0, months=0, years=0) -> datetime:
+    """
+    Возвращает время в utc минус количество переданное в параметрах
+    """
     weeks += months * 4
     weeks += years * 12 * 4
     delta = timedelta(hours=hours, days=days, weeks=weeks)
     return datetime.now(timezone.utc) - delta
-
-
-def main():
-    token = "t.IEa99GPRoD0m0Z3MH_M2BUMIAVsqYMCpcmJhQFIKDw8rg3tk7CpENgicqyVpOMSTK1ubCt1ZB7SQCXTcEy0Dcw"
-    metal_key = "5f266da4bdd540557f1d6c8707360cc8"
-    exchange_rate_key = "752cb5b3134f445168799121"
-    cur = parser.CurrencyInfo(token, metal_key, exchange_rate_key)
-    build_graph_candles(
-        cur,
-        "USD000000TOD",
-        start_time=get_start_time(hours=59),
-        end_time=get_start_time(),
-        interval="1hour",
-    )
-
-
-if __name__ == "__main__":
-    main()
