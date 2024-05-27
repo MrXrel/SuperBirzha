@@ -118,6 +118,7 @@ def get_currency(currency_id, time="1h", graph_type="lines", colour="standart"):
                 start_time=get_start_time(hours=times_for_graphs[time][0]),
                 end_time=get_start_time(),
                 interval=times_for_graphs[time][1],
+                color=colour,
             )
         else:
             graph = build_graph_line(
@@ -126,6 +127,7 @@ def get_currency(currency_id, time="1h", graph_type="lines", colour="standart"):
                 start_time=get_start_time(hours=times_for_graphs[time][0]),
                 end_time=get_start_time(),
                 interval=times_for_graphs[time][1],
+                color=colour,
             )
     except (KeyError, ValueError):
         return redirect(url_for("get_private_office"))
@@ -153,7 +155,8 @@ def post_buy_sell_currency(
     currency_id, time="1h", graph_type="lines", colour="standart"
 ):
     data = {}
-
+    if "colour" in request.form:
+        colour = request.form["colour"]
     if "graph_type" in request.form:
         graph_type = request.form["graph_type"]
     if "time" in request.form:
@@ -229,6 +232,15 @@ def post_buy_sell_currency(
                     colour=colour,
                 )
             )
+    return redirect(
+        url_for(
+            "get_currency",
+            currency_id=currency_id,
+            time=time,
+            graph_type=graph_type,
+            colour=colour,
+        )
+    )
 
 
 # Страница со всеми валютами
