@@ -2,7 +2,6 @@ from typing import List, Optional, Dict
 from tinkoff.invest import InstrumentIdType, InstrumentStatus, CandleInterval, Client, HistoricCandle, Quotation
 from pandas import DataFrame
 import pandas as pd
-import config
 from datetime import datetime, timedelta
 import requests
 
@@ -19,9 +18,15 @@ all_figi = {
     ('euro', 'EUR'): 'BBG0013HJJ31'
 }
 
-
 class CurrencyInfo:
-    def __init__(self, token: str) -> None:
+    '''
+    Класс для работы с информацией о валютах через API Tinkoff Invest.
+
+    Предоставляет методы для получения информации о валютах, включая их историю цен, а так же получение
+    полного перечня информации о каждой валюте. Используется токен для аутентификации на API Tinkoff Invest.
+    '''
+
+    def __init__(self, token, api_metal_key, exchange_rate_key) -> None:
         """
         Инициализация класса с токеном для аутентификации на API Tinkoff Invest.
 
@@ -30,8 +35,9 @@ class CurrencyInfo:
         token : str
             Токен для аутентификации на API Tinkoff Invest.
         """
-        self.token = config.token
-        self.api_exchange_rate_key = config.exchange_rate_key
+        self.token = token
+        self.api_metal_key = api_metal_key
+        self.api_exchange_rate_key = exchange_rate_key
 
     def get_exchange_rate_of_currency(self, base_currency: str, target_currency: str) -> float:
         """
@@ -420,5 +426,4 @@ class CurrencyInfo:
             Цена валюты в рублях.
         """
         return current_candle.units + current_candle.nano / 1e9  # nano - 9 нулей
-
 

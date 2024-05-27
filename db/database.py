@@ -165,11 +165,13 @@ class Database:
         dict
             словарь с полями 'ID', 'email', 'password', 'surname', 'name', 'balance', 'time_to_note'
         """
-
-        s = select(self.users).where(self.users.c.ID == user_id)
-        r = self.conn.execute(s)
-        p = r.fetchall()[0]
-        return {key: value for key, value in zip(self.user_keys, p)}
+        try:
+            s = select(self.users).where(self.users.c.ID == user_id)
+            r = self.conn.execute(s)
+            p = r.fetchall()[0]
+            return {key: value for key, value in zip(self.user_keys, p)}
+        except Exception:
+            return 0
 
     def get_user_data_by_email(self, email: str) -> dict:
         """

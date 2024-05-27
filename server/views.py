@@ -3,8 +3,7 @@ from server import (
     dbase,
     CURRENCIES,
     parser_API,
-    metal_key,
-    exchange_rate_key,
+    config,
 )
 from flask import (
     render_template,
@@ -19,12 +18,21 @@ from server import models, login_manager
 from .forms.Registration import RegistrationForm
 from .forms.Login import LoginForm
 from .forms.PayMenu import PayDeposit, PayWithdraw
-from .graph import build_graph, get_start_time
+from .graph import build_graph_candles, get_start_time, build_graph_line
 from flask_login import login_user, current_user, login_required, logout_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime, timedelta, timezone
 from bokeh.embed import components
 import json
+
+times_for_graphs = {
+    "1h": [1, "3minutes"],
+    "3h": [3, "5minutes"],
+    "1d": [24, "30minutes"],
+    "7d": [24 * 7, "1hour"],
+    "1mon": [24 * 30, "1day"],
+    "1year": [24 * 30 * 12, "1week"],
+}
 
 
 @login_manager.user_loader
@@ -91,25 +99,42 @@ def get_history():
 
 
 # Страница отдельной валюты
-@app.get("/currency/<currency_id>")
-def get_currency(currency_id):
+@app.get("/currency/<currency_id>/<time>/<graph_type>/<colour>")
+def get_currency(currency_id, time="1h", graph_type="lines", colour="standart"):
     price = price = parser_API.get_current_price_by_figi(
         parser_API.get_figi_by_ticker(CURRENCIES[currency_id][0])
     )
     data = models.Currency(
         currency_id, CURRENCIES[currency_id][1], price, price - (price * 0.07)
     )
-    with open("server/templates/about_currencies.json", "r") as js:
+    with open("server/templates/about_currencies.json", "r", encoding="utf8") as js:
         json_dump = json.load(js)
         about = json_dump[currency_id]
-    graph = build_graph(
-        parser_API,
-        CURRENCIES[currency_id][0],
-        start_time=get_start_time(hours=59),
-        end_time=get_start_time(),
-        interval="1hour",
-    )
-    script, div = components(graph)
+    try:
+        if graph_type == "candles":
+            graph = build_graph_candles(
+                parser_API,
+                CURRENCIES[currency_id][0],
+                start_time=get_start_time(hours=times_for_graphs[time][0]),
+                end_time=get_start_time(),
+                interval=times_for_graphs[time][1],
+            )
+        else:
+            graph = build_graph_line(
+                parser_API,
+                CURRENCIES[currency_id][0],
+                start_time=get_start_time(hours=times_for_graphs[time][0]),
+                end_time=get_start_time(),
+                interval=times_for_graphs[time][1],
+            )
+    except (KeyError, ValueError):
+        return redirect(url_for("get_private_office"))
+
+    try:
+        script, div = components(graph)
+    except ValueError:
+        script = "Проблема на стороне api"
+        div = "Приносим извинения\n"
 
     return render_template(
         "pettern_currencies.html",
@@ -117,44 +142,93 @@ def get_currency(currency_id):
         about=about,
         the_div=div,
         the_script=script,
+        colour=colour,
     )
 
 
 # Покупка/продажа валюты
-@app.post("/currency/<currency_id>")
+@app.post("/currency/<currency_id>/<time>/<graph_type>/<colour>")
 @login_required
-def post_buy_sell_currency(currency_id):
+def post_buy_sell_currency(
+    currency_id, time="1h", graph_type="lines", colour="standart"
+):
     data = {}
-    count_currency = float(request.form["count"])
+
+    if "graph_type" in request.form:
+        graph_type = request.form["graph_type"]
+    if "time" in request.form:
+        time = request.form["time"]
+    if "count" in request.form:
+        count_currency = request.form["count"]
+        try:
+            count_currency = float(count_currency)
+        except ValueError:
+            flash("Введите число")
+            return redirect(
+                url_for(
+                    "get_currency",
+                    currency_id=currency_id,
+                    time=time,
+                    graph_type=graph_type,
+                    colour=colour,
+                )
+            )
+    else:
+        return redirect(
+            url_for(
+                "get_currency",
+                currency_id=currency_id,
+                time=time,
+                graph_type=graph_type,
+                colour=colour,
+            )
+        )
+
     for cuur in CURRENCIES:
         price = parser_API.get_current_price_by_figi(
             parser_API.get_figi_by_ticker(CURRENCIES[cuur][0])
         )
         data[cuur] = price
     dbase.update_currency(data)
+
     if "submit_buy" in request.form:
         res = dbase.add_operation(
             current_user.get_id(),
             CURRENCIES[currency_id][2],
             "BUY",
-            count_currency,
+            float(count_currency),
             get_current_time(),
         )
         if res == 0:
             flash("Недостаточно средств")
-            return redirect(url_for("get_currency", currency_id=currency_id))
+            return redirect(
+                url_for(
+                    "get_currency",
+                    currency_id=currency_id,
+                    time=time,
+                    graph_type=graph_type,
+                    colour=colour,
+                )
+            )
     else:
         res = dbase.add_operation(
             current_user.get_id(),
             CURRENCIES[currency_id][2],
             "SELL",
-            count_currency,
+            float(count_currency),
             get_current_time(),
         )
         if res == 0:
             flash("Недостаточно валюты")
-            return redirect(url_for("get_currency", currency_id=currency_id))
-    return redirect(url_for("get_currency", currency_id=currency_id))
+            return redirect(
+                url_for(
+                    "get_currency",
+                    currency_id=currency_id,
+                    time=time,
+                    graph_type=graph_type,
+                    colour=colour,
+                )
+            )
 
 
 # Страница со всеми валютами
@@ -169,7 +243,6 @@ def get_currencies():
         data[cuur] = price
     dbase.update_currency(data)
     for currency in data:
-
         currencies.append(
             models.Currency(
                 currency,
@@ -189,13 +262,33 @@ def get_about_us():
 
 
 # Личный кабинет
-@app.route("/private-office")
+@app.get("/private-office")
 @login_required
 def get_private_office():
     data = dbase.get_briefcase_by_id(current_user.get_id())
+    tg_id = None
     for oper in data:
         data[oper]["name_currency"] = CURRENCIES[oper][1]
-    return render_template("personal_account.html", user=current_user, data=data)
+    tg_id = dbase.get_all_user_for_tg_bot()[int(current_user.get_id())]["tg_id"]
+    return render_template(
+        "personal_account.html", user=current_user, data=data, tg=tg_id
+    )
+
+
+# Личный кабинет
+@app.post("/private-office")
+@login_required
+def post_private_office():
+    if "tg_id" in request.form:
+        tg_id = request.form["tg_id"]
+        count = request.form["count"]
+        dbase.update_tg_id(current_user.get_id(), tg_id)
+        dbase.update_delta_to_note(current_user.get_id(), count)
+        return redirect(url_for("get_private_office"))
+    elif "replace" in request.form:
+        dbase.update_tg_id(current_user.get_id(), 0)
+        dbase.update_delta_to_note(current_user.get_id(), 0)
+        return redirect(url_for("get_private_office"))
 
 
 # Страница регистрации
@@ -208,7 +301,6 @@ def user_registration():
             data = dbase.create_user(
                 form.email.data, hash, form.surname.data, form.name.data
             )
-            print(data)
             if data == 0:
                 flash("Пользователь с такой почтой уже существует.")
                 return redirect(url_for("user_registration"))

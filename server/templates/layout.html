@@ -20,19 +20,22 @@
 <body>
     <div class="navbaru">
         <h2>МАИ Инвестиции</h2>
-        <div class="dropdownSS">
-            <button class="dropbtnSS"><a href="{{ url_for('get_private_office')}}">Профиль</a>
-                <i class="fa fa-caret-down"></i>
-            </button>
-            <div class="dropdown-contentSS">
-                <a href="{{url_for('get_history')}}">История</a>
-                <a href="{{url_for('get_deposit_pay')}}">Пополнить</a>
-                <a href="{{url_for('get_withdraw_pay')}}">Вывод средств</a>
-                <a href="{{ url_for('user_logout')}}">Выйти</a>
+        <div class="menu_right">
+            <a href="{{ url_for('get_about_us') }}">О нас</a>  
+            <a href="{{ url_for('get_currencies') }}">Валюта</a>
+            <div class="dropdownSS">
+                <button class="dropbtnSS"><a href="{{ url_for('get_private_office')}}">Профиль</a>
+                    <i class="fa fa-caret-down"></i>
+                </button>
+                <div class="dropdown-contentSS">
+                    <a href="{{url_for('get_history')}}">История</a>
+                    <a href="{{url_for('get_deposit_pay')}}">Пополнить</a>
+                    <a href="{{url_for('get_withdraw_pay')}}">Вывод средств</a>
+                    <a href="{{ url_for('user_logout')}}">Выйти</a>
+                </div>
             </div>
-        </div>
-        <a href="{{ url_for('get_currencies') }}">Валюта</a>
-        <a href="{{ url_for('get_about_us') }}">О нас</a>      
+            
+        </div>    
     </div>
     {% block sign %}
 

@@ -3,9 +3,8 @@ from math import pi
 from datetime import datetime, timedelta, timezone
 from parser import parser
 from bokeh.plotting import figure, show
-
+from bokeh.models import ColumnDataSource, FactorRange, HoverTool
 import pprint
-
 from tinkoff.invest import CandleInterval
 
 intervals = {
@@ -33,57 +32,158 @@ width_of_candle = {
 }
 
 
-def build_graph(
-    cur_info: parser.CurrencyInfo,
-    ticker: str,
-    start_time: datetime,
-    end_time: datetime,
-    interval: str,
+def build_graph_candles(
+        cur_info: parser.CurrencyInfo,
+        ticker: str,
+        start_time: datetime,
+        end_time: datetime,
+        interval: str,
+        color="standart"
 ):
     data = cur_info.get_history_of_current_currency_by_ticker(
         ticker, start_time, end_time, intervals[interval]
     )
-    pprint.pprint(data)
+    colors = {"standart": ["blue", "red"], "daltonic": ["#6495ED", "#BDB76B"]}
+
+    for el in data:
+        el["change"] = (el["close"] - el["open"]) / 100
     data = {i: data[i] for i in range(len(data))}
-    print(data)
     data = pd.DataFrame.from_dict(data, orient="index")
-    print(data)
+    # data['change'] =
+    source = ColumnDataSource(
+        data=dict(
+            time=data["time"].tolist(),
+            open=data["open"].tolist(),
+            volume=data["volume"].tolist(),
+            close=data["close"].tolist(),
+            high=data["high"].tolist(),
+            low=data["low"].tolist(),
+            change=data["change"].tolist(),
+        )
+    )
     try:
-        inc = data["close"] > data["open"]
-        dec = data["open"] > data["close"]
+        data_inc = data[data["close"] > data["open"]]
+        data_dec = data[data["open"] > data["close"]]
+
+        source_inc = ColumnDataSource(
+            data=dict(
+                time=data_inc["time"].tolist(),
+                open=data_inc["open"].tolist(),
+                volume=data_inc["volume"].tolist(),
+                close=data_inc["close"].tolist(),
+                high=data_inc["high"].tolist(),
+                low=data_inc["low"].tolist(),
+                change=data_inc["change"].tolist(),
+            )
+        )
+        source_dec = ColumnDataSource(
+            data=dict(
+                time=data_dec["time"].tolist(),
+                open=data_dec["open"].tolist(),
+                volume=data_dec["volume"].tolist(),
+                close=data_dec["close"].tolist(),
+                high=data_dec["high"].tolist(),
+                low=data_dec["low"].tolist(),
+                change=data_dec["change"].tolist(),
+            )
+        )
+
     except KeyError:
         return "BirzhaIsClosed"
-
     w = width_of_candle[interval]  # trading time in ms
 
     TOOLS = "pan,wheel_zoom,box_zoom,reset,save"
 
+    TOOLTIPS = [
+        ("Date", "@time{%d.%m.%Y %H:%M}"),
+        ("Open", "@open{0.2f}"),
+        ("High", "@high{0.2f}"),
+        ("Low", "@low{0.2f}"),
+        ("Close", "@close{0.2f}"),
+        ("Change", "@change{0.4f}"),
+        ("Volume", "@volume{0.2f}"),
+    ]
+
+    hover_tool = HoverTool(tooltips=TOOLTIPS, formatters={"@time": "datetime"})
     p = figure(
         x_axis_type="datetime",
         width=1000,
         tools=TOOLS,
-        title="Pfizer Candlestick Chart",
+        title="Курс Валюты",
     )
+    p.add_tools(hover_tool)
     p.xaxis.major_label_orientation = pi / 4
     p.grid.grid_line_alpha = 0.3
 
-    p.segment(data["time"], data["high"], data["time"], data["low"], color="black")
+    p.segment(x0="time", y0="high", x1="time", y1="low", source=source, color="black")
     p.vbar(
-        data["time"][inc],
-        w,
-        data["open"][inc],
-        data["close"][inc],
-        fill_color="blue",
+        width=w,
+        fill_color=colors[color][0],
         line_color="black",
+        x="time",
+        top="open",
+        bottom="close",
+        source=source_inc,
     )
     p.vbar(
-        data["time"][dec],
-        w,
-        data["open"][dec],
-        data["close"][dec],
-        fill_color="red",
+        width=w,
+        fill_color=colors[color][1],
         line_color="black",
+        x="time",
+        top="open",
+        bottom="close",
+        source=source_dec,
     )
+    return p
+
+
+def build_graph_line(
+        cur_info: parser.CurrencyInfo,
+        ticker: str,
+        start_time: datetime,
+        end_time: datetime,
+        interval: str,
+        color="standart"
+):
+    colors = {"standart": "#0000FF", "daltonic": "#000000"}
+    data = cur_info.get_history_of_current_currency_by_ticker(
+        ticker, start_time, end_time, intervals[interval]
+    )
+    for el in data:
+        el["change"] = (el["close"] - el["open"]) / 100
+    data = {i: data[i] for i in range(len(data))}
+    data = pd.DataFrame.from_dict(data, orient="index")
+    # data['change'] =
+    source = ColumnDataSource(
+        data=dict(
+            time=data["time"].tolist(),
+            open=data["open"].tolist(),
+            volume=data["volume"].tolist(),
+            close=data["close"].tolist(),
+            high=data["high"].tolist(),
+            low=data["low"].tolist(),
+            change=data["change"].tolist(),
+        )
+    )
+    TOOLS = "pan,wheel_zoom,box_zoom,reset,save"
+    TOOLTIPS = [
+        ("Date", "@time{%d.%m.%Y %H:%M}"),
+        ("Open", "@open{0.2f}"),
+        ("Close", "@close{0.2f}"),
+        ("Volume", "@volume{0.2f}"),
+        ("Change", "@change{0.4f}"),
+    ]
+    hover_tool = HoverTool(tooltips=TOOLTIPS, formatters={"@time": "datetime"})
+    p = figure(
+        x_axis_type="datetime",
+        width=1000,
+        tools=TOOLS,
+    )
+    p.add_tools(hover_tool)
+    p.xaxis.major_label_orientation = pi / 4
+    p.grid.grid_line_alpha = 0.3
+
+    p.line(x='time', y='close', source=source, line_width=2, color=colors[color])
     return p
 
 
@@ -99,7 +199,7 @@ def main():
     metal_key = "5f266da4bdd540557f1d6c8707360cc8"
     exchange_rate_key = "752cb5b3134f445168799121"
     cur = parser.CurrencyInfo(token, metal_key, exchange_rate_key)
-    build_graph(
+    build_graph_candles(
         cur,
         "USD000000TOD",
         start_time=get_start_time(hours=59),

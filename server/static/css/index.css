@@ -328,7 +328,6 @@ footer {
 
 .dropdownSS {
     float: right;
-    overflow: hidden;
 }
 
 .dropdownSS .dropbtnSS {
@@ -336,10 +335,8 @@ footer {
     border: none;
     outline: none;
     color: white;
-    padding: 14px 16px;
     background-color: inherit;
     font-family: inherit;
-    margin: 0;
 }
 
 .dropdown-contentSS {
@@ -368,9 +365,6 @@ footer {
     display: block;
 }
 
-.dropdownSS:hover .dropbtnSS {
-    background-color: #1f5bc2;
-}
 
 .buy {
     color: #fc0c0c;
@@ -421,6 +415,7 @@ footer {
     align-items: stretch;
 }
 
+
 .graph {
     display: inline-block;
 }
@@ -432,4 +427,88 @@ footer {
     background-color: #fff;
     border-radius: 10px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.menu_right {
+    float: right;
+    text-align: center;
+    font-size: 16px;
+}
+
+.sub_button {
+    padding-left: 100px;
+    display: inline-block;
+    align-items: stretch;
+}
+
+
+.graph_settings_button {
+  background-color: #0095ff;
+  border: 1px solid transparent;
+  border-radius: 3px;
+  box-shadow: rgba(255, 255, 255, .4) 0 1px 0 0 inset;
+  box-sizing: border-box;
+  color: #fff;
+  cursor: pointer;
+  display: inline-block;
+  font-family: -apple-system,system-ui,"Segoe UI","Liberation Sans",sans-serif;
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 1.15385;
+  margin: 0;
+  outline: none;
+  padding: 8px .8em;
+  position: relative;
+  text-align: center;
+  text-decoration: none;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+  vertical-align: baseline;
+  white-space: nowrap;
+}
+
+.graph_settings_button:hover,
+.graph_settings_button:focus {
+  background-color: #07c;
+}
+
+.graph_settings_button:focus {
+  box-shadow: 0 0 0 4px rgba(0, 149, 255, .15);
+}
+
+.graph_settings_button:active {
+  background-color: #0064bd;
+  box-shadow: none;
+}
+
+.input_tg_info{
+    height: 20px;
+}
+
+.tg_info {
+    width: 200px;
+}
+
+.button_tg_info {
+    height: 30px;
+    background-color: #0095ff;
+    border: 1px solid transparent;
+    border-radius: 3px;
+    color: #fff;
+
+}
+
+.button_tg_info:hover,
+.button_tg_info:focus {
+  background-color: #07c;
+}
+
+.button_tg_info:focus {
+  box-shadow: 0 0 0 4px rgba(0, 149, 255, .15);
+}
+
+.button_tg_info:active {
+  background-color: #0064bd;
+  box-shadow: none;
 }
