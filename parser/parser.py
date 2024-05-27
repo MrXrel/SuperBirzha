@@ -34,7 +34,6 @@ class CurrencyInfo:
         :param token: Токен для аутентификации на API Tinkoff Invest.
         """
         self.token = config.token
-        self.api_metal_key = config.metal_key
         self.api_exchange_rate_key = config.exchange_rate_key
 
     def get_exchange_rate_of_currency(self, base_currency: str, target_currency: str) -> float:
@@ -54,8 +53,7 @@ class CurrencyInfo:
 
     def get_exchange_rate_of_metal(self) -> float:
         """
-        Получение текущего курса металла.
-
+        Получение текущего курса металла
 
         Parameters
         ----------
