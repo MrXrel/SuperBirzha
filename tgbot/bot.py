@@ -39,10 +39,13 @@ async def echo_handler(message: Message) -> None:
 async def scheduled_message():
     user_list = list(dbase.get_all_user_for_tg_bot().values())
     for user in user_list:
-        if user['tg_id'] != 0:
-            await bot.send_message(chat_id=user['tg_id'],
+        if user['tg_id'] != 0 and abs(user['new_briefcase'] - user['old_briefcase']) >= user['delta_to_note']:
+            try:
+                dbase.update_old_briefcase_by_id(user['ID'])
+                await bot.send_message(chat_id=user['tg_id'],
                                    text=f"{html.bold(user['name'].capitalize())}, стоимость Вашего портфеля изменилась больше, чем вы указывали.\nИзменение портфеля: {html.bold(user['new_briefcase'] - user['old_briefcase'])}")
-
+            except Exception:
+                pass
 
 async def main() -> None:
     global bot
