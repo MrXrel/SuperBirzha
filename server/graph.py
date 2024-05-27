@@ -86,23 +86,24 @@ def build_graph_candles(
         print(data)
     w = width_of_candle[interval]  # trading time in ms
 
-    TOOLS = "pan,wheel_zoom,box_zoom,reset,save,hover"
+    TOOLS = "pan,wheel_zoom,box_zoom,reset,save"
 
-    TOOLTIPS = [('Open', '@open{0.2f}'),
+    TOOLTIPS = [("Date", "@time{%d.%m.%Y %H:%M}"),
+                ("Open", '@open{0.2f}'),
                 ("High", "@high{0.2f}"),
                 ("Low", "@low{0.2f}"),
                 ("Close", "@close{0.2f}"),
                 ("Change", "@change{0.4f}"),
                 ("Volume", "@volume{0.2f}")]
 
+    hover_tool = HoverTool(tooltips=TOOLTIPS, formatters={"@time": "datetime"})
     p = figure(
         x_axis_type="datetime",
         width=1000,
         tools=TOOLS,
         title="Курс Валюты",
-        tooltips=TOOLTIPS,
     )
-
+    p.add_tools(hover_tool)
     p.xaxis.major_label_orientation = pi / 4
     p.grid.grid_line_alpha = 0.3
 
@@ -154,18 +155,19 @@ def build_graph_line(
         low=data["low"].tolist(),
         change=data['change'].tolist(),
     ))
-    TOOLS = "pan,wheel_zoom,box_zoom,reset,save,hover"
-    TOOLTIPS = [('Open', '@open{0.2f}'),
+    TOOLS = "pan,wheel_zoom,box_zoom,reset,save"
+    TOOLTIPS = [("Date", "@time{%d.%m.%Y %H:%M}"),
+                ('Open', '@open{0.2f}'),
                 ("Close", "@close{0.2f}"),
                 ("Volume", "@volume{0.2f}"),
                 ("Change", "@change{0.4f}")]
-
+    hover_tool = HoverTool(tooltips=TOOLTIPS, formatters={"@time":"datetime"})
     p = figure(
         x_axis_type="datetime",
         width=1000,
         tools=TOOLS,
-        tooltips=TOOLTIPS,
     )
+    p.add_tools(hover_tool)
     p.xaxis.major_label_orientation = pi / 4
     p.grid.grid_line_alpha = 0.3
 
