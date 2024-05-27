@@ -38,10 +38,13 @@ def build_graph_candles(
         start_time: datetime,
         end_time: datetime,
         interval: str,
+        color="standart"
 ):
     data = cur_info.get_history_of_current_currency_by_ticker(
         ticker, start_time, end_time, intervals[interval]
     )
+    colors = {"standart": ["blue", "red"], "daltonic": ["#6495ED", "#BDB76B"]}
+
     for el in data:
         el['change'] = (el['close'] - el['open'])/100
     data = {i: data[i] for i in range(len(data))}
@@ -110,7 +113,7 @@ def build_graph_candles(
     p.segment(x0='time', y0='high', x1="time", y1="low", source=source, color="black")
     p.vbar(
         width=w,
-        fill_color="blue",
+        fill_color=colors[color][0],
         line_color="black",
         x='time',
         top='open',
@@ -120,7 +123,7 @@ def build_graph_candles(
     )
     p.vbar(
         width=w,
-        fill_color="red",
+        fill_color=colors[color][1],
         line_color="black",
         x='time',
         top='open',
@@ -137,6 +140,7 @@ def build_graph_line(
         start_time: datetime,
         end_time: datetime,
         interval: str,
+        color="standart"
 ):
     data = cur_info.get_history_of_current_currency_by_ticker(
         ticker, start_time, end_time, intervals[interval]
