@@ -15,32 +15,34 @@
             </thead>
             <tbody>
                 {% for operation in data %}
-                <tr>
-                    <th scope="row">
-                        <div id="front">{{operation["time"].strftime('%Y-%m-%d %H:%M')}}</div>
-                        {% if operation["type_of_operation"] == "WITHDRAW"  %}
-                            <a class="color-change-link">Вывод средств</a>
-                        {% elif operation["type_of_operation"] == "DEPOSIT" %}
-                            <a class="color-change-link">Пополнение баланса</a>
+                {% if (operation["price"] > 0) or (operation["quantity"] > 0) %}
+                    <tr>
+                        <th scope="row">
+                            <div id="front">{{operation["time"].strftime('%Y-%m-%d %H:%M')}}</div>
+                            {% if operation["type_of_operation"] == "WITHDRAW"  %}
+                                <a class="color-change-link">Вывод средств</a>
+                            {% elif operation["type_of_operation"] == "DEPOSIT" %}
+                                <a class="color-change-link">Пополнение баланса</a>
+                            {% else %}
+                                <a href="{{url_for('get_currency', currency_id=operation['currency_ID'], time='1h')}}" class="color-change-link">{{ operation["currency_ID"] }}</a>
+                            {% endif %}
+                        </th>
+                        
+                        {% if operation["type_of_operation"] == "BUY"  %}
+                            <td>{{operation["quantity"]}}</td>
+                            <td><div class="buy"><span>-{{(operation["price"] * operation["quantity"])|round(2)}}</span> ₽</div> <!-- пишешь - или + -->
+                        {% elif operation["type_of_operation"] == "WITHDRAW" %}   
+                            <td>-</td>
+                            <td><div class="buy"><span>-{{operation["quantity"]|round(2)}}</span> ₽</div>
+                        {% elif operation["type_of_operation"] == "DEPOSIT" %}   
+                            <td>-</td>
+                            <td><div class="sell"><span>+{{operation["quantity"]|round(2)}}</span> ₽</div>
                         {% else %}
-                            <a href="{{url_for('get_currency', currency_id=operation['currency_ID'])}}" class="color-change-link">{{ operation["currency_ID"] }}</a>
+                            <td>{{operation["quantity"]}}</td>
+                            <td><div class="sell"><span>+{{(operation["price"] * operation["quantity"])|round(2)}}</span> ₽</div>
                         {% endif %}
-                    </th>
-                    
-                    {% if operation["type_of_operation"] == "BUY"  %}
-                        <td>{{operation["quantity"]}}</td>
-                        <td><div class="buy"><span>-{{(operation["price"] * operation["quantity"])|round(2)}}</span> ₽</div> <!-- пишешь - или + -->
-                    {% elif operation["type_of_operation"] == "WITHDRAW" %}   
-                        <td>-</td>
-                        <td><div class="buy"><span>-{{operation["quantity"]|round(2)}}</span> ₽</div>
-                    {% elif operation["type_of_operation"] == "DEPOSIT" %}   
-                        <td>-</td>
-                        <td><div class="sell"><span>+{{operation["quantity"]|round(2)}}</span> ₽</div>
-                    {% else %}
-                        <td>{{operation["quantity"]}}</td>
-                        <td><div class="sell"><span>+{{(operation["price"] * operation["quantity"])|round(2)}}</span> ₽</div>
-                    {% endif %}
-                </tr>
+                    </tr>
+                {% endif %}
                 {% endfor %}
             </tbody>
         </table>
