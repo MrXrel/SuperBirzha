@@ -49,6 +49,7 @@ def get_withdraw_pay():
 
 
 @app.post("/pay-withdraw")
+@login_required
 def post_withdraw_pay():
     count = request.form["count"]
     balance = dbase.get_user_data_by_id(current_user.get_id())["balance"]
@@ -73,6 +74,7 @@ def get_deposit_pay():
 
 
 @app.post("/pay-deposit")
+@login_required
 def post_deposit_pay():
     count = request.form["count"]
     res = dbase.change_balance(
@@ -150,7 +152,6 @@ def get_currency(currency_id, time="1h", graph_type="lines", colour="standart"):
 
 # Покупка/продажа валюты
 @app.post("/currency/<currency_id>/<time>/<graph_type>/<colour>")
-@login_required
 def post_buy_sell_currency(
     currency_id, time="1h", graph_type="lines", colour="standart"
 ):
@@ -194,7 +195,7 @@ def post_buy_sell_currency(
         data[cuur] = price
     dbase.update_currency(data)
 
-    if "submit_buy" in request.form:
+    if "submit_buy" in request.form and current_user.is_authenticated:
         res = dbase.add_operation(
             current_user.get_id(),
             CURRENCIES[currency_id][2],
@@ -213,7 +214,7 @@ def post_buy_sell_currency(
                     colour=colour,
                 )
             )
-    else:
+    elif "submit_sell" and current_user.is_authenticated:
         res = dbase.add_operation(
             current_user.get_id(),
             CURRENCIES[currency_id][2],
@@ -232,6 +233,8 @@ def post_buy_sell_currency(
                     colour=colour,
                 )
             )
+    else:
+        return redirect(url_for("get_user_authorization"))
     return redirect(
         url_for(
             "get_currency",
