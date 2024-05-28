@@ -3,7 +3,14 @@ from flask_login import LoginManager
 from db import database
 from parser import parser
 import os
-from server.config import DATABASE, SECRET_KEY, CURRENCIES, TOKEN, METAL_KEY, EXCHANGE_RATE_KEY
+from server.config import (
+    DATABASE,
+    SECRET_KEY,
+    CURRENCIES,
+    TOKEN,
+    METAL_KEY,
+    EXCHANGE_RATE_KEY,
+)
 
 app = Flask(__name__)
 app.config.from_object(__name__)
